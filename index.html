@@ -770,7 +770,8 @@
       document.getElementById('app-store-nome').textContent = loja.nome;
 
       // PROMOTOR
-      document.getElementById('prom-foto').src = promotor.foto_perfil;
+      const fallbackPromotor = `https://ui-avatars.com/api/?name=${encodeURIComponent(promotor.nome)}&background=00843D&color=fff&size=200`;
+      document.getElementById('prom-foto').src = promotor.foto_perfil || fallbackPromotor;
       document.getElementById('prom-nome').textContent = promotor.nome;
 
       // Calcula tempo automaticamente a partir de uma data ISO
@@ -804,12 +805,15 @@
 
       // LIDERANÇA
       document.getElementById('lider-count').textContent = lideranca.length + ' pessoas';
-      document.getElementById('lideranca-grid').innerHTML = lideranca.map(l => `
+      document.getElementById('lideranca-grid').innerHTML = lideranca.map(l => {
+        const fallbackLider = `https://ui-avatars.com/api/?name=${encodeURIComponent(l.nome)}&background=00843D&color=fff&size=200`;
+        return `
         <div class="lider-card">
-          <img src="${l.foto_perfil}" alt="${l.nome}" />
+          <img src="${l.foto_perfil || fallbackLider}" alt="${l.nome}" />
           <div class="lider-nome">${l.nome.split(' ')[0] + ' ' + (l.nome.split(' ').slice(-1)[0] || '')}</div>
           <div class="lider-cargo">${l.cargo}</div>
-        </div>`).join('');
+        </div>`;
+      }).join('');
 
       // TELA 2: CONTRATOS
       const cAlert = document.getElementById('contrato-alert');
@@ -1013,7 +1017,8 @@
 
         // Preenche splash com dados da loja
         const bg = document.getElementById('splash-bg');
-        bg.style.backgroundImage = `url('${data.loja.imagem_fachada}')`;
+        const fallbackFachada = 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=800&auto=format&fit=crop';
+        bg.style.backgroundImage = `url('${data.loja.imagem_fachada || fallbackFachada}')`;
         document.getElementById('splash-nome').innerHTML =
           'Você está no<br><span>' + data.loja.nome + '</span>';
         document.getElementById('splash-address').textContent = data.loja.endereco || '';
