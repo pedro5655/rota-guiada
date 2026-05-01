@@ -747,6 +747,17 @@
           </ul>
         </div>
 
+        <!-- ── FEEDBACK CTA ── -->
+        <div class="card-dark slide-up" style="margin-top: 40px; margin-bottom: 40px; text-align: center; border: 1px solid var(--green); background: rgba(0, 132, 61, 0.05);">
+          <div style="font-size: 2.5rem; margin-bottom: 10px;">💬</div>
+          <h2 style="font-size: 1.2rem; color: var(--white); margin-bottom: 8px;">Deixe seu Feedback</h2>
+          <p style="font-size: 0.85rem; color: var(--silver); margin-bottom: 20px; line-height: 1.5;">O que você achou da execução nesta loja? Sua avaliação é fundamental para nossa melhoria contínua.</p>
+          <button class="splash-btn" style="width: 100%; border-radius: 12px; font-size: 0.9rem; padding: 16px;" onclick="abrirFeedback()">
+            <span>Avaliar Visita</span>
+            <span>★</span>
+          </button>
+        </div>
+
       </div>
     </div>
 
@@ -980,6 +991,12 @@
       if (currentScreen > 1) {
         navTo(currentScreen - 1);
       }
+    }
+
+    function abrirFeedback() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const lojaId = urlParams.get('loja') || 'mundial_abelardo';
+      window.location.href = 'feedback.html?loja=' + lojaId;
     }
 
     // ── Loading → Splash → App ─────────────────────────

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Avaliação da Visita</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <style>
+    :root {
+      --bg: #0f120f;
+      --green: #00843D;
+      --green-light: #00b050;
+      --white: #ffffff;
+      --silver: #8a968a;
+      --gold: #e8c547;
+      --card-bg: rgba(255,255,255,0.03);
+      --card-border: rgba(255,255,255,0.08);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--white); display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
+    
+    .container { width: 100%; max-width: 500px; padding-top: 5vh; }
+    
+    .header { text-align: center; margin-bottom: 30px; }
+    .header-logo { font-size: 0.8rem; font-weight: 800; letter-spacing: 0.3em; color: var(--green-light); text-transform: uppercase; margin-bottom: 10px; display: block; }
+    .header h1 { font-size: 1.8rem; font-weight: 800; line-height: 1.1; margin-bottom: 8px; }
+    .header p { color: var(--silver); font-size: 0.9rem; }
+    
+    .card {
+      background: linear-gradient(135deg, #0f1e16 0%, #162019 100%);
+      border: 1px solid rgba(0,132,61,.3);
+      border-radius: 20px; padding: 30px 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.6), 0 0 0 1px rgba(0,132,61,.1);
+      backdrop-filter: blur(10px); text-align: center;
+    }
+
+    .stars { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; flex-direction: row-reverse; }
+    .stars input { display: none; }
+    .stars label { font-size: 2.5rem; color: rgba(255,255,255,0.1); cursor: pointer; transition: color 0.2s, transform 0.2s; }
+    
+    /* Mágica do CSS para as estrelas (direção reversa permite colorir as anteriores com hover) */
+    .stars label:hover,
+    .stars label:hover ~ label,
+    .stars input:checked ~ label { color: var(--gold); }
+    .stars label:active { transform: scale(0.9); }
+
+    .input-group { margin-bottom: 20px; text-align: left; }
+    .input-group label { display: block; font-size: 0.8rem; color: var(--silver); margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    input[type="text"], textarea {
+      width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--card-border);
+      background: rgba(255,255,255,0.05); color: var(--white); font-size: 1rem; outline: none;
+      transition: border-color 0.2s; font-family: inherit;
+    }
+    textarea { resize: vertical; min-height: 120px; }
+    input:focus, textarea:focus { border-color: var(--green-light); background: rgba(255,255,255,0.08); }
+
+    .btn {
+      width: 100%; padding: 16px; background: var(--green); color: white; border: none; border-radius: 12px;
+      font-size: 1.1rem; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em;
+      transition: background 0.2s, transform 0.1s; margin-top: 10px;
+    }
+    .btn:hover { background: var(--green-light); }
+    .btn:active { transform: scale(0.98); }
+
+    .success-msg { display: none; text-align: center; padding: 40px 20px; }
+    .success-msg h2 { color: var(--green-light); font-size: 2rem; margin-bottom: 10px; }
+    .success-msg p { color: var(--silver); font-size: 1rem; }
+    .success-msg .check-icon { font-size: 4rem; margin-bottom: 20px; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+    @keyframes popIn {
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header" id="header">
+      <span class="header-logo">Heineken</span>
+      <h1>Como foi a execução?</h1>
+      <p>Sua avaliação é fundamental para continuarmos evoluindo o <span id="loja-nome-txt" style="color:var(--white);font-weight:600;">PDV</span>.</p>
+    </div>
+
+    <form class="card" id="feedback-form">
+      
+      <div class="stars">
+        <input type="radio" name="rating" id="star5" value="5" required><label for="star5">★</label>
+        <input type="radio" name="rating" id="star4" value="4"><label for="star4">★</label>
+        <input type="radio" name="rating" id="star3" value="3"><label for="star3">★</label>
+        <input type="radio" name="rating" id="star2" value="2"><label for="star2">★</label>
+        <input type="radio" name="rating" id="star1" value="1"><label for="star1">★</label>
+      </div>
+
+      <div class="input-group">
+        <label>Seu Nome e Cargo (Opcional)</label>
+        <input type="text" id="autor" placeholder="Ex: João Silva - Diretor RJ">
+      </div>
+
+      <div class="input-group">
+        <label>Elogios ou Sugestões</label>
+        <textarea id="comentario" placeholder="Deixe um comentário sobre a execução desta loja..."></textarea>
+      </div>
+
+      <button type="submit" class="btn" id="submit-btn">Enviar Avaliação</button>
+    </form>
+
+    <div class="success-msg" id="success-msg">
+      <div class="check-icon">✅</div>
+      <h2>Obrigado!</h2>
+      <p>Seu feedback foi enviado para a liderança e nos ajudará a alcançar a execução perfeita.</p>
+    </div>
+  </div>
+
+  <script>
+    // Pegar ID da loja pela URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const lojaId = urlParams.get('loja') || 'Desconhecida';
+    
+    // Tentar pegar o nome real da loja no banco de dados para ficar mais bonito
+    async function carregarNomeLoja() {
+      if (lojaId === 'Desconhecida') return;
+      try {
+        const doc = await db.collection("lojas").doc(lojaId).get();
+        if (doc.exists && doc.data().loja && doc.data().loja.nome) {
+          document.getElementById('loja-nome-txt').textContent = doc.data().loja.nome;
+        }
+      } catch(e) { console.error(e); }
+    }
+    carregarNomeLoja();
+
+    const form = document.getElementById('feedback-form');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submit-btn');
+      btn.innerText = "Enviando...";
+      btn.style.opacity = "0.7";
+      
+      const nota = document.querySelector('input[name="rating"]:checked').value;
+      const autor = document.getElementById('autor').value || 'Anônimo';
+      const comentario = document.getElementById('comentario').value;
+
+      try {
+        await db.collection("feedbacks").add({
+          loja_id: lojaId,
+          nota: Number(nota),
+          autor: autor,
+          comentario: comentario,
+          data: new Date().toISOString()
+        });
+
+        // Sucesso
+        form.style.display = 'none';
+        document.getElementById('header').style.display = 'none';
+        document.getElementById('success-msg').style.display = 'block';
+
+      } catch (error) {
+        console.error("Erro ao enviar feedback:", error);
+        alert("Erro ao enviar: " + error.message);
+        btn.innerText = "Tentar Novamente";
+        btn.style.opacity = "1";
+      }
+    });
+  </script>
+</body>
+</html>

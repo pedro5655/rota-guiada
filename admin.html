@@ -64,13 +64,18 @@
     #admin-section { display: none; }
     .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 20px; margin-bottom: 25px; }
     
-    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
     .logout-btn { background: none; border: none; color: var(--silver); cursor: pointer; font-size: 0.8rem; text-decoration: underline; }
     
     .status-msg { margin-top: 15px; text-align: center; font-size: 0.9rem; min-height: 20px; }
     .loader { display: none; text-align: center; margin: 20px 0; color: var(--green-light); }
 
     .contrato-bloco { border: 1px dashed var(--card-border); padding: 15px; border-radius: 8px; margin-bottom: 15px; background: rgba(0,0,0,0.2); }
+    
+    .feedback-item { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid var(--gold); }
+    .feedback-stars { color: var(--gold); font-size: 1.2rem; margin-bottom: 5px; }
+    .feedback-autor { font-size: 0.8rem; color: var(--silver); margin-bottom: 10px; }
+    .feedback-text { font-size: 0.95rem; line-height: 1.4; color: var(--white); }
   </style>
 </head>
 <body>
@@ -98,10 +103,13 @@
     <div id="admin-section">
       <div class="top-bar">
         <h1>Painel da Loja</h1>
-        <button onclick="fazerLogout()" class="logout-btn">Sair</button>
+        <div style="display:flex; gap:10px;">
+          <button onclick="mostrarFeedbacks()" class="btn btn-secondary" style="padding:6px 12px; margin:0; font-size:0.75rem;">⭐ Feedbacks</button>
+          <button onclick="fazerLogout()" class="logout-btn">Sair</button>
+        </div>
       </div>
       
-      <div class="card" style="border-color: var(--green);">
+      <div class="card" style="border-color: var(--green);" id="seletor-loja">
         <div class="input-group" style="margin:0;">
           <label style="color:var(--green-light)">Selecione a Loja para Editar</label>
           <select id="loja-select" onchange="carregarDadosLoja()">
@@ -112,6 +120,13 @@
       </div>
 
       <div id="loader" class="loader">Buscando dados no servidor...</div>
+
+      <!-- TELA DE FEEDBACKS (Oculta por padrão) -->
+      <div id="feedbacks-view" style="display:none;">
+        <button class="btn btn-secondary" onclick="voltarParaEdicao()" style="margin-bottom:20px;">← Voltar para Edição</button>
+        <h2>Avaliações da Loja</h2>
+        <div id="feedbacks-list"></div>
+      </div>
 
       <form id="edit-form" style="display:none;">
         
@@ -563,6 +578,72 @@
     function verNoApp() {
       const lojaId = document.getElementById('loja-select').value;
       window.open('index.html?loja=' + lojaId, '_blank');
+    }
+
+    // FEEDBACKS
+    async function mostrarFeedbacks() {
+      document.getElementById('edit-form').style.display = 'none';
+      document.getElementById('seletor-loja').style.display = 'none';
+      document.getElementById('feedbacks-view').style.display = 'block';
+      const container = document.getElementById('feedbacks-list');
+      container.innerHTML = '<div class="loader" style="display:block;">Buscando avaliações...</div>';
+      
+      const lojaId = document.getElementById('loja-select').value;
+      
+      try {
+        const snapshot = await db.collection('feedbacks')
+                                 .where('loja_id', '==', lojaId)
+                                 .orderBy('data', 'desc')
+                                 .get();
+                                 
+        if (snapshot.empty) {
+          container.innerHTML = '<p style="color:var(--silver);text-align:center;">Nenhuma avaliação recebida para esta loja ainda.</p>';
+          return;
+        }
+
+        let html = '';
+        snapshot.forEach(doc => {
+          const f = doc.data();
+          const stars = '★'.repeat(f.nota) + '☆'.repeat(5 - f.nota);
+          const dataFormatada = new Date(f.data).toLocaleDateString('pt-BR');
+          html += `
+            <div class="feedback-item">
+              <div class="feedback-stars">${stars}</div>
+              <div class="feedback-autor">${f.autor} • ${dataFormatada}</div>
+              <div class="feedback-text">"${f.comentario}"</div>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+      } catch(e) {
+        // Fallback incase index isn't created yet for orderBy
+        if(e.message.includes('index')) {
+           container.innerHTML = '<p style="color:var(--silver);text-align:center;">Buscando sem ordenação estrita (índice em criação)...</p>';
+           const snap2 = await db.collection('feedbacks').where('loja_id', '==', lojaId).get();
+           if(snap2.empty) { container.innerHTML = '<p style="color:var(--silver);text-align:center;">Nenhuma avaliação recebida.</p>'; return; }
+           let html = '';
+           snap2.forEach(doc => {
+             const f = doc.data();
+             const stars = '★'.repeat(f.nota) + '☆'.repeat(5 - f.nota);
+             html += `
+               <div class="feedback-item">
+                 <div class="feedback-stars">${stars}</div>
+                 <div class="feedback-autor">${f.autor}</div>
+                 <div class="feedback-text">"${f.comentario}"</div>
+               </div>
+             `;
+           });
+           container.innerHTML = html;
+        } else {
+           container.innerHTML = '<p style="color:red;text-align:center;">Erro ao carregar avaliações: ' + e.message + '</p>';
+        }
+      }
+    }
+
+    function voltarParaEdicao() {
+      document.getElementById('feedbacks-view').style.display = 'none';
+      document.getElementById('seletor-loja').style.display = 'block';
+      carregarDadosLoja();
     }
   </script>
 </body>
