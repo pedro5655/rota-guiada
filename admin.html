@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Completo - Rota Guiada</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <style>
+    :root {
+      --bg: #0f120f;
+      --green: #00843D;
+      --green-light: #00b050;
+      --white: #ffffff;
+      --silver: #8a968a;
+      --card-bg: rgba(255,255,255,0.03);
+      --card-border: rgba(255,255,255,0.08);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--white); display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
+    
+    .container { width: 100%; max-width: 600px; padding-bottom: 80px; }
+    
+    h1 { font-weight: 800; font-size: 1.5rem; text-align: center; margin-bottom: 30px; letter-spacing: -0.02em; color: var(--green-light); }
+    h2 { font-size: 1.2rem; color: var(--white); margin-bottom: 15px; border-bottom: 1px solid var(--card-border); padding-bottom: 5px; }
+    
+    /* Login Form */
+    #login-section { margin-top: 10vh; }
+    .input-group { margin-bottom: 12px; }
+    .input-group label { display: block; font-size: 0.75rem; color: var(--silver); margin-bottom: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    
+    input[type="text"], input[type="email"], input[type="password"], input[type="number"], input[type="date"], select, textarea {
+      width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--card-border);
+      background: rgba(255,255,255,0.05); color: var(--white); font-size: 0.95rem; outline: none;
+      transition: border-color 0.2s; font-family: inherit;
+    }
+    textarea { resize: vertical; min-height: 80px; }
+    input:focus, select:focus, textarea:focus { border-color: var(--green); }
+    
+    .row { display: flex; gap: 10px; }
+    .row .input-group { flex: 1; }
+
+    .checkbox-group { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+    .checkbox-group input { width: 20px; height: 20px; accent-color: var(--green); }
+    .checkbox-group label { margin: 0; font-size: 0.9rem; color: var(--white); text-transform: none; letter-spacing: normal; }
+
+    .btn {
+      width: 100%; padding: 14px; background: var(--green); color: white; border: none; border-radius: 8px;
+      font-size: 1rem; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em;
+      transition: background 0.2s; margin-top: 10px;
+    }
+    .btn:hover { background: var(--green-light); }
+    .btn-secondary { background: transparent; border: 1px solid var(--green); color: var(--green-light); }
+    .btn-danger { background: rgba(235, 87, 87, 0.1); color: #eb5757; border: 1px solid #eb5757; padding: 8px; font-size: 0.8rem; margin-top: 5px; }
+    
+    /* Admin Dashboard */
+    #admin-section { display: none; }
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 20px; margin-bottom: 25px; }
+    
+    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .logout-btn { background: none; border: none; color: var(--silver); cursor: pointer; font-size: 0.8rem; text-decoration: underline; }
+    
+    .status-msg { margin-top: 15px; text-align: center; font-size: 0.9rem; min-height: 20px; }
+    .loader { display: none; text-align: center; margin: 20px 0; color: var(--green-light); }
+
+    .contrato-bloco { border: 1px dashed var(--card-border); padding: 15px; border-radius: 8px; margin-bottom: 15px; background: rgba(0,0,0,0.2); }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- TELA DE LOGIN -->
+    <div id="login-section">
+      <h1>HEINEKEN ADMIN</h1>
+      <form id="login-form">
+        <div class="input-group">
+          <label>E-mail Corporativo</label>
+          <input type="email" id="email" required placeholder="pedro@heineken.com">
+        </div>
+        <div class="input-group">
+          <label>Senha</label>
+          <input type="password" id="senha" required placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn">Entrar</button>
+        <div id="login-error" class="status-msg" style="color: #eb5757;"></div>
+      </form>
+    </div>
+
+    <!-- TELA DE ADMINISTRAÇÃO -->
+    <div id="admin-section">
+      <div class="top-bar">
+        <h1>Painel da Loja</h1>
+        <button onclick="fazerLogout()" class="logout-btn">Sair</button>
+      </div>
+      
+      <div class="card" style="border-color: var(--green);">
+        <div class="input-group" style="margin:0;">
+          <label style="color:var(--green-light)">Selecione a Loja para Editar</label>
+          <select id="loja-select" onchange="carregarDadosLoja()">
+            <option value="mundial_abelardo">Mundial Abelardo Bueno</option>
+            <!-- Lojas futuras aqui -->
+          </select>
+        </div>
+      </div>
+
+      <div id="loader" class="loader">Buscando dados no servidor...</div>
+
+      <form id="edit-form" style="display:none;">
+        
+        <!-- BLOCO 1: LOJA -->
+        <div class="card">
+          <h2>🏢 Dados da Loja</h2>
+          <div class="input-group"><label>Nome da Loja</label><input type="text" id="loja_nome" required></div>
+          <div class="input-group"><label>Endereço</label><input type="text" id="loja_endereco" required></div>
+          <div class="row">
+            <div class="input-group"><label>Tipo</label><input type="text" id="loja_tipo"></div>
+            <div class="input-group"><label>Inauguração</label><input type="date" id="loja_inauguracao"></div>
+          </div>
+          <div class="row">
+            <div class="input-group"><label>Checkouts</label><input type="number" id="loja_checkouts" required></div>
+            <div class="input-group"><label>Área (m²)</label><input type="number" id="loja_area" required></div>
+          </div>
+          <div class="input-group"><label>URL da Foto da Fachada</label><input type="text" id="loja_foto"></div>
+        </div>
+
+        <!-- BLOCO 2: PROMOTOR -->
+        <div class="card">
+          <h2>👤 Perfil do Promotor</h2>
+          <div class="input-group"><label>Nome</label><input type="text" id="prom_nome" required></div>
+          <div class="row">
+            <div class="input-group"><label>Idade (anos)</label><input type="number" id="prom_idade"></div>
+            <div class="input-group"><label>Paixão</label><input type="text" id="prom_paixao"></div>
+          </div>
+          <div class="input-group"><label>Valor Heineken que mais se identifica</label><input type="text" id="prom_valor"></div>
+          <div class="row">
+            <div class="input-group"><label>Data Entrada Cia</label><input type="date" id="prom_data_cia"></div>
+            <div class="input-group"><label>Data Entrada Loja</label><input type="date" id="prom_data_loja"></div>
+          </div>
+          <div class="input-group"><label>URL da Foto do Promotor</label><input type="text" id="prom_foto"></div>
+        </div>
+
+        <!-- BLOCO 3: FDS E SOVI -->
+        <div class="card">
+          <h2>📊 SOVI & FDS 2026</h2>
+          <div class="row">
+            <div class="input-group"><label>Pontuação FDS (0-100)</label><input type="number" id="fds_pontuacao" required></div>
+            <div class="input-group"><label>Share Total Cia (%)</label><input type="number" step="0.1" id="sovi_share_total"></div>
+          </div>
+          <div class="checkbox-group">
+            <input type="checkbox" id="fds_itens_obrig">
+            <label>Itens obrigatórios cadastrados?</label>
+          </div>
+          
+          <h3 style="font-size:0.8rem; margin:15px 0 5px; color:var(--silver);">SOVI Craft (%)</h3>
+          <div class="row">
+            <div class="input-group"><label>Atual</label><input type="number" id="sovi_craft_atual"></div>
+            <div class="input-group"><label>Meta</label><input type="number" id="sovi_craft_meta"></div>
+          </div>
+          <h3 style="font-size:0.8rem; margin:10px 0 5px; color:var(--silver);">SOVI Premium (%)</h3>
+          <div class="row">
+            <div class="input-group"><label>Atual</label><input type="number" id="sovi_prem_atual"></div>
+            <div class="input-group"><label>Meta</label><input type="number" id="sovi_prem_meta"></div>
+          </div>
+          <h3 style="font-size:0.8rem; margin:10px 0 5px; color:var(--silver);">SOVI Mainstream (%)</h3>
+          <div class="row">
+            <div class="input-group"><label>Atual</label><input type="number" id="sovi_main_atual"></div>
+            <div class="input-group"><label>Meta</label><input type="number" id="sovi_main_meta"></div>
+          </div>
+        </div>
+
+        <!-- BLOCO 4: PONTOS EXTRAS -->
+        <div class="card">
+          <h2>🎁 Pontos Extras</h2>
+          <div class="row">
+            <div class="input-group"><label>Total na Loja</label><input type="number" id="pe_total"></div>
+            <div class="input-group"><label>% Cia vs Concorrência</label><input type="number" step="0.1" id="pe_perc_cia"></div>
+          </div>
+          
+          <h3 style="font-size:0.8rem; margin:15px 0 5px; color:var(--silver);">Qtd. Craft</h3>
+          <div class="row">
+            <div class="input-group"><label>Atual</label><input type="number" id="pe_craft_atual"></div>
+            <div class="input-group"><label>Meta</label><input type="number" id="pe_craft_meta"></div>
+          </div>
+          <h3 style="font-size:0.8rem; margin:10px 0 5px; color:var(--silver);">Qtd. Premium</h3>
+          <div class="row">
+            <div class="input-group"><label>Atual</label><input type="number" id="pe_prem_atual"></div>
+            <div class="input-group"><label>Meta</label><input type="number" id="pe_prem_meta"></div>
+          </div>
+          <h3 style="font-size:0.8rem; margin:10px 0 5px; color:var(--silver);">Qtd. Mainstream</h3>
+          <div class="row">
+            <div class="input-group"><label>Atual</label><input type="number" id="pe_main_atual"></div>
+            <div class="input-group"><label>Meta</label><input type="number" id="pe_main_meta"></div>
+          </div>
+          <div class="checkbox-group" style="margin-top:10px;">
+            <input type="checkbox" id="pe_display">
+            <label>Possui Display de Marca?</label>
+          </div>
+        </div>
+
+        <!-- BLOCO 5: REFRIGERADORES & KPIs -->
+        <div class="card">
+          <h2>❄️ Refrigeradores & Finanças</h2>
+          <div class="row">
+            <div class="input-group"><label>Geladeiras Cia</label><input type="number" id="gel_cia"></div>
+            <div class="input-group"><label>Geladeiras Concorrência</label><input type="number" id="gel_conc"></div>
+          </div>
+          <div class="checkbox-group">
+            <input type="checkbox" id="gel_cinza">
+            <label>Tem refrigerador cinza na loja?</label>
+          </div>
+          
+          <h3 style="font-size:0.8rem; margin:15px 0 5px; color:var(--silver);">KPIs da Loja</h3>
+          <div class="input-group"><label>Faturamento Bruto (R$)</label><input type="number" id="kpi_fat"></div>
+          <div class="row">
+            <div class="input-group"><label>Volume (HL)</label><input type="number" step="0.1" id="kpi_vol"></div>
+            <div class="input-group"><label>Mix Premium (%)</label><input type="number" step="0.1" id="kpi_mix"></div>
+          </div>
+        </div>
+
+        <!-- BLOCO 6: CONTRATOS -->
+        <div class="card">
+          <h2>📜 Contratos</h2>
+          <div class="checkbox-group">
+            <input type="checkbox" id="contrato_vigente">
+            <label>Loja possui contrato vigente?</label>
+          </div>
+          
+          <div id="lista_contratos"></div>
+          <button type="button" class="btn btn-secondary" style="font-size:0.8rem; padding:8px;" onclick="addBlocoContrato()">+ Adicionar Bloco de Contrato</button>
+        </div>
+
+        <div id="save-status" class="status-msg"></div>
+        <button type="submit" class="btn" style="position:sticky; bottom:20px; box-shadow:0 10px 20px rgba(0,0,0,0.5);">Salvar Tudo</button>
+        <button type="button" class="btn btn-secondary" onclick="verNoApp()">Ver no App</button>
+        
+      </form>
+    </div>
+
+  </div>
+
+  <script>
+    // ELEMENTOS GERAIS
+    const loginSection = document.getElementById('login-section');
+    const adminSection = document.getElementById('admin-section');
+    const loginForm = document.getElementById('login-form');
+    const editForm = document.getElementById('edit-form');
+    const loader = document.getElementById('loader');
+    
+    // VERIFICAR SE ESTÁ LOGADO
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        loginSection.style.display = 'none';
+        adminSection.style.display = 'block';
+        carregarDadosLoja();
+      } else {
+        loginSection.style.display = 'block';
+        adminSection.style.display = 'none';
+      }
+    });
+
+    // LOGIN & LOGOUT
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const senha = document.getElementById('senha').value;
+      const errorDiv = document.getElementById('login-error');
+      errorDiv.innerText = "Autenticando...";
+      try { await auth.signInWithEmailAndPassword(email, senha); errorDiv.innerText = ""; } 
+      catch (error) { errorDiv.innerText = "Erro: " + error.message; }
+    });
+    function fazerLogout() { auth.signOut(); }
+
+    // RENDERIZAR CONTRATOS DINÂMICOS
+    let blocosContratuais = [];
+    function renderizarContratos() {
+      const container = document.getElementById('lista_contratos');
+      container.innerHTML = '';
+      blocosContratuais.forEach((bloco, index) => {
+        const div = document.createElement('div');
+        div.className = 'contrato-bloco';
+        div.innerHTML = `
+          <div class="input-group">
+            <label>Título do Bloco</label>
+            <input type="text" value="${bloco.titulo}" onchange="blocosContratuais[${index}].titulo = this.value">
+          </div>
+          <div class="input-group">
+            <label>Itens (um por linha)</label>
+            <textarea onchange="blocosContratuais[${index}].itens = this.value.split('\\n').filter(i=>i.trim()!=='')">${bloco.itens.join('\n')}</textarea>
+          </div>
+          <button type="button" class="btn btn-danger" onclick="removerBloco(${index})">Remover Bloco</button>
+        `;
+        container.appendChild(div);
+      });
+    }
+    function addBlocoContrato() {
+      blocosContratuais.push({ titulo: "Novo Bloco", itens: ["Item 1"] });
+      renderizarContratos();
+    }
+    function removerBloco(index) {
+      blocosContratuais.splice(index, 1);
+      renderizarContratos();
+    }
+
+    // CARREGAR DADOS DA LOJA DO FIRESTORE
+    let lojaAtualData = null; // Guarda o documento inteiro para não perder liderança e perfil_vendas
+    async function carregarDadosLoja() {
+      const lojaId = document.getElementById('loja-select').value;
+      editForm.style.display = 'none';
+      loader.style.display = 'block';
+      document.getElementById('save-status').innerText = "";
+
+      try {
+        const docSnap = await db.collection("lojas").doc(lojaId).get();
+        if (docSnap.exists) {
+          const data = docSnap.data();
+          lojaAtualData = data;
+          
+          // Loja
+          document.getElementById('loja_nome').value = data.loja.nome || '';
+          document.getElementById('loja_endereco').value = data.loja.endereco || '';
+          document.getElementById('loja_tipo').value = data.loja.tipo || '';
+          document.getElementById('loja_inauguracao').value = data.loja.data_inauguracao || '';
+          document.getElementById('loja_checkouts').value = data.loja.checkouts || 0;
+          document.getElementById('loja_area').value = data.loja.area_vendas_m2 || 0;
+          document.getElementById('loja_foto').value = data.loja.imagem_fachada || '';
+
+          // Promotor
+          document.getElementById('prom_nome').value = data.promotor.nome || '';
+          document.getElementById('prom_idade').value = data.promotor.idade || '';
+          document.getElementById('prom_paixao').value = data.promotor.paixao || '';
+          document.getElementById('prom_valor').value = data.promotor.valor_cia || '';
+          document.getElementById('prom_data_cia').value = data.promotor.data_entrada_cia || '';
+          document.getElementById('prom_data_loja').value = data.promotor.data_entrada_loja || '';
+          document.getElementById('prom_foto').value = data.promotor.foto_perfil || '';
+
+          // FDS
+          document.getElementById('fds_pontuacao').value = data.fds_2026.pontuacao_atual || 0;
+          document.getElementById('fds_itens_obrig').checked = !!data.fds_2026.itens_obrigatorios_cadastrados;
+
+          // SOVI
+          document.getElementById('sovi_share_total').value = data.fds_2026.sovi.share_total || 0;
+          document.getElementById('sovi_craft_atual').value = data.fds_2026.sovi.share_categorias.craft.atual || 0;
+          document.getElementById('sovi_craft_meta').value = data.fds_2026.sovi.share_categorias.craft.meta || 0;
+          document.getElementById('sovi_prem_atual').value = data.fds_2026.sovi.share_categorias.premium.atual || 0;
+          document.getElementById('sovi_prem_meta').value = data.fds_2026.sovi.share_categorias.premium.meta || 0;
+          document.getElementById('sovi_main_atual').value = data.fds_2026.sovi.share_categorias.mainstream.atual || 0;
+          document.getElementById('sovi_main_meta').value = data.fds_2026.sovi.share_categorias.mainstream.meta || 0;
+
+          // PE
+          document.getElementById('pe_total').value = data.fds_2026.pontos_extras.total_loja || 0;
+          document.getElementById('pe_perc_cia').value = data.fds_2026.pontos_extras.percentual_cia_vs_concorrencia || 0;
+          document.getElementById('pe_display').checked = !!data.fds_2026.pontos_extras.tem_display;
+          document.getElementById('pe_craft_atual').value = data.fds_2026.pontos_extras.pe_categorias.craft.atual || 0;
+          document.getElementById('pe_craft_meta').value = data.fds_2026.pontos_extras.pe_categorias.craft.meta || 0;
+          document.getElementById('pe_prem_atual').value = data.fds_2026.pontos_extras.pe_categorias.premium.atual || 0;
+          document.getElementById('pe_prem_meta').value = data.fds_2026.pontos_extras.pe_categorias.premium.meta || 0;
+          document.getElementById('pe_main_atual').value = data.fds_2026.pontos_extras.pe_categorias.mainstream.atual || 0;
+          document.getElementById('pe_main_meta').value = data.fds_2026.pontos_extras.pe_categorias.mainstream.meta || 0;
+
+          // Refrigeradores
+          document.getElementById('gel_cia').value = data.fds_2026.refrigeradores.cia_quantidade || 0;
+          document.getElementById('gel_conc').value = data.fds_2026.refrigeradores.concorrencia_quantidade || 0;
+          document.getElementById('gel_cinza').checked = !!data.fds_2026.refrigeradores.tem_refrigerador_cinza_na_loja;
+
+          // KPIs
+          document.getElementById('kpi_fat').value = data.kpis.faturamento_bruto || 0;
+          document.getElementById('kpi_vol').value = data.kpis.volume_hl || 0;
+          document.getElementById('kpi_mix').value = data.kpis.mix_premium || 0;
+
+          // Contratos
+          document.getElementById('contrato_vigente').checked = !!(data.contrato && data.contrato.vigente);
+          blocosContratuais = (data.contrato && data.contrato.blocos_contratuais) ? JSON.parse(JSON.stringify(data.contrato.blocos_contratuais)) : [];
+          renderizarContratos();
+          
+          loader.style.display = 'none';
+          editForm.style.display = 'block';
+        } else {
+          alert("Loja não encontrada no banco de dados.");
+          loader.style.display = 'none';
+        }
+      } catch (error) {
+        console.error("Erro ao carregar:", error);
+        loader.innerText = "Erro de conexão com o banco.";
+      }
+    }
+
+    // N atalho para converter pra numérico
+    const n = (id) => Number(document.getElementById(id).value);
+    const v = (id) => document.getElementById(id).value;
+    const c = (id) => document.getElementById(id).checked;
+
+    // SALVAR ALTERAÇÕES
+    editForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const lojaId = document.getElementById('loja-select').value;
+      const statusDiv = document.getElementById('save-status');
+      
+      statusDiv.style.color = "var(--silver)";
+      statusDiv.innerText = "Salvando todas as informações...";
+
+      try {
+        // Montar o objeto completo mesclando com o lojaAtualData para não apagar a liderança
+        const newData = {
+          ...lojaAtualData,
+          loja: {
+            ...lojaAtualData.loja,
+            nome: v('loja_nome'), endereco: v('loja_endereco'), tipo: v('loja_tipo'),
+            data_inauguracao: v('loja_inauguracao'), checkouts: n('loja_checkouts'),
+            area_vendas_m2: n('loja_area'), imagem_fachada: v('loja_foto')
+          },
+          promotor: {
+            ...lojaAtualData.promotor,
+            nome: v('prom_nome'), idade: n('prom_idade'), paixao: v('prom_paixao'),
+            valor_cia: v('prom_valor'), data_entrada_cia: v('prom_data_cia'),
+            data_entrada_loja: v('prom_data_loja'), foto_perfil: v('prom_foto')
+          },
+          fds_2026: {
+            ...lojaAtualData.fds_2026,
+            pontuacao_atual: n('fds_pontuacao'),
+            itens_obrigatorios_cadastrados: c('fds_itens_obrig'),
+            sovi: {
+              ...lojaAtualData.fds_2026.sovi,
+              share_total: n('sovi_share_total'),
+              share_categorias: {
+                craft: { atual: n('sovi_craft_atual'), meta: n('sovi_craft_meta') },
+                premium: { atual: n('sovi_prem_atual'), meta: n('sovi_prem_meta') },
+                mainstream: { atual: n('sovi_main_atual'), meta: n('sovi_main_meta') }
+              }
+            },
+            pontos_extras: {
+              ...lojaAtualData.fds_2026.pontos_extras,
+              total_loja: n('pe_total'), percentual_cia_vs_concorrencia: n('pe_perc_cia'), tem_display: c('pe_display'),
+              pe_categorias: {
+                craft: { atual: n('pe_craft_atual'), meta: n('pe_craft_meta') },
+                premium: { atual: n('pe_prem_atual'), meta: n('pe_prem_meta') },
+                mainstream: { atual: n('pe_main_atual'), meta: n('pe_main_meta') }
+              }
+            },
+            refrigeradores: {
+              ...lojaAtualData.fds_2026.refrigeradores,
+              cia_quantidade: n('gel_cia'), concorrencia_quantidade: n('gel_conc'), tem_refrigerador_cinza_na_loja: c('gel_cinza')
+            }
+          },
+          kpis: {
+            ...lojaAtualData.kpis,
+            faturamento_bruto: n('kpi_fat'), volume_hl: n('kpi_vol'), mix_premium: n('kpi_mix')
+          },
+          contrato: {
+            ...lojaAtualData.contrato,
+            vigente: c('contrato_vigente'),
+            blocos_contratuais: blocosContratuais
+          }
+        };
+
+        await db.collection("lojas").doc(lojaId).set(newData);
+        
+        statusDiv.style.color = "var(--green-light)";
+        statusDiv.innerText = "✅ Tudo salvo com sucesso!";
+        setTimeout(() => statusDiv.innerText = "", 4000);
+      } catch (error) {
+        statusDiv.style.color = "#eb5757";
+        statusDiv.innerText = "❌ Erro ao salvar: " + error.message;
+      }
+    });
+
+    function verNoApp() {
+      const lojaId = document.getElementById('loja-select').value;
+      window.open('index.html?loja=' + lojaId, '_blank');
+    }
+  </script>
+</body>
+</html>

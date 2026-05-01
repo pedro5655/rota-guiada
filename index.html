@@ -6,7 +6,14 @@
   <title>Rota Guiada Heineken</title>
   <meta name="description" content="App mobile-first para guiar visitas da liderança Heineken em pontos de venda." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -994,9 +1001,12 @@
         const urlParams = new URLSearchParams(window.location.search);
         const lojaId = urlParams.get('loja') || 'mundial_abelardo';
 
-        const res = await fetch('./lojas/' + lojaId + '.json');
-        if (!res.ok) throw new Error('Loja não encontrada');
-        const data = await res.json();
+        // Buscando dados do Firebase Firestore em tempo real
+        const docRef = db.collection("lojas").doc(lojaId);
+        const docSnap = await docRef.get();
+        
+        if (!docSnap.exists) throw new Error('Loja não encontrada na nuvem');
+        const data = docSnap.data();
         _appData = data;
 
         renderApp(data);
