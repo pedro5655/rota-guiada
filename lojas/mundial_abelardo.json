@@ -1,0 +1,193 @@
+{
+  "loja": {
+    "id": "PDV-2018-RJ-001",
+    "nome": "Mundial Abelardo Bueno",
+    "endereco": "Av. Embaixador Abelardo Bueno, 2660 - Barra Olímpica, Rio de Janeiro - RJ",
+    "data_inauguracao": "2018-05-23",
+    "checkouts": 40,
+    "area_vendas_m2": 4000,
+    "perfil_vendas": "Alto giro em cervejas premium e long neck. Pico de vendas às sextas e sábados (18h–22h). Forte sazonalidade no verão carioca. Canal: Autosserviço – Classe B/C.",
+    "tipo": "Supermercado",
+    "imagem_fachada": "./fachada.jpg.png"
+  },
+
+  "promotor": {
+    "nome": "Luiz Chipolesch",
+    "idade": 37,
+    "data_entrada_cia": "2022-04-04",
+    "data_entrada_loja": "2025-08-01",
+    "paixao": "Frequentar shows e festivais de música",
+    "valor_cia": "CORAGEM",
+    "foto_perfil": "./Luiz.promotor.jfif",
+    "conquistas": [
+      "Top 3 promotores da região Sul/SE em Q4 2024",
+      "100% de OSA (On Shelf Availability) em Jan/2025",
+      "Certificado no treinamento de Execução Perfeita"
+    ]
+  },
+
+  "lideranca": [
+    {
+      "id": 1,
+      "nome": "Isis Colicigno",
+      "cargo": "Supervisora de Trade",
+      "foto_perfil": "./Isis.supervisora.jfif"
+    },
+    {
+      "id": 2,
+      "nome": "Joyce Santiago",
+      "cargo": "Executivo de Trade",
+      "foto_perfil": "./Joyce.executiva.jfif"
+    },
+    {
+      "id": 3,
+      "nome": "Ana Luiza Moraes",
+      "cargo": "Coordenadora de Trade",
+      "foto_perfil": "./ana luiza.cordenadora.jfif"
+    },
+    {
+      "id": 4,
+      "nome": "Celso Junior",
+      "cargo": "Executivo de Vendas",
+      "foto_perfil": "./celsojunior.executivo de vendas.jfif"
+    },
+    {
+      "id": 5,
+      "nome": "Rodrigo Balbi",
+      "cargo": "Gerente de Vendas",
+      "foto_perfil": "./RodrigoBalbi.gerentedevendas.jfif"
+    },
+    {
+      "id": 6,
+      "nome": "Fernando Auger",
+      "cargo": "Gerente Regional",
+      "foto_perfil": "./Fernando Auger.gerenteregional.jfif"
+    }
+  ],
+
+  "contrato": {
+    "vigente": true,
+    "tipo": "JBP",
+    "blocos_contratuais": [
+      {
+        "titulo": "🛒 Gôndola",
+        "itens": [
+          "40% para marca Heineken",
+          "5% para Sol e Sol Zero",
+          "3% para PRAYA"
+        ]
+      },
+      {
+        "titulo": "📍 Ponto Extra",
+        "itens": [
+          "35% nos pontos extras da loja",
+          "Presença obrigatória: Sol, Sol 0.0 e Praya Lager"
+        ]
+      },
+      {
+        "titulo": "❄️ Geladeiras",
+        "itens": [
+          "Ativação em todas as lojas da rede"
+        ]
+      },
+      {
+        "titulo": "📰 Encartes",
+        "itens": [
+          "2 produtos por mês (1 por quinzena)"
+        ]
+      }
+    ],
+    "cumprindo_acordado": true
+  },
+
+  "fds_2026": {
+    "pontuacao_atual": 96,
+    "itens_obrigatorios_cadastrados": true,
+    "sovi": {
+      "share_total": 48.0,
+      "share_categorias": {
+        "craft": {
+          "atual": 60,
+          "meta": 53
+        },
+        "premium": {
+          "atual": 59,
+          "meta": 57
+        },
+        "mainstream": {
+          "atual": 25,
+          "meta": 25
+        }
+      }
+    },
+    "pontos_extras": {
+      "percentual_cia_vs_concorrencia": 65.0,
+      "total_loja": 20,
+      "pe_categorias": {
+        "craft": {
+          "atual": 1,
+          "meta": 1
+        },
+        "premium": {
+          "atual": 9,
+          "meta": 4
+        },
+        "mainstream": {
+          "atual": 3,
+          "meta": 3
+        }
+      },
+      "atinge_meta": false,
+      "tem_display": false
+    },
+    "refrigeradores": {
+      "cia_quantidade": 5,
+      "concorrencia_quantidade": 1,
+      "capacidade_padrao": "Equipamentos com 4 níveis/prateleiras",
+      "tem_refrigerador_cinza_na_loja": false
+    }
+  },
+
+  "kpis": {
+    "share_categoria": 38.5,
+    "meta_share": 42.0,
+    "volume_mes": 1840,
+    "meta_volume_mes": 2100,
+    "osa": 91.3,
+    "meta_osa": 98.0,
+    "ruptura_ativa": 3
+  },
+
+  "roteiro_visita": [
+    {
+      "ordem": 1,
+      "titulo": "Apresentação do Promotor",
+      "descricao": "Conhecer o promotor responsável pelo PDV, sua história e conexão com a marca."
+    },
+    {
+      "ordem": 2,
+      "titulo": "Visão Geral da Loja",
+      "descricao": "Contextualizar o PDV: perfil de público, potencial de vendas e histórico do contrato."
+    },
+    {
+      "ordem": 3,
+      "titulo": "Avaliação de Execução (Checklist)",
+      "descricao": "Verificar presença, exposição, preço e ponto extra conforme os padrões Heineken."
+    },
+    {
+      "ordem": 4,
+      "titulo": "Status do Contrato",
+      "descricao": "Revisar as contrapartidas pactuadas e o percentual de cumprimento atual."
+    },
+    {
+      "ordem": 5,
+      "titulo": "KPIs & Oportunidades",
+      "descricao": "Analisar share, OSA e volume versus metas. Identificar gaps e próximos passos."
+    },
+    {
+      "ordem": 6,
+      "titulo": "Encerramento & Alinhamentos",
+      "descricao": "Registrar plano de ação, definir responsáveis e data do próximo follow-up."
+    }
+  ]
+}
