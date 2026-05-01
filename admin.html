@@ -236,6 +236,17 @@
           <button type="button" class="btn btn-secondary" style="font-size:0.8rem; padding:8px;" onclick="addBlocoContrato()">+ Adicionar Bloco de Contrato</button>
         </div>
 
+        <!-- BLOCO 7: LIDERANÇA DA LOJA -->
+        <div class="card">
+          <h2>👥 Liderança da Loja</h2>
+          <div class="input-group"><label>Supervisor(a) de Trade</label><select id="lid_supervisor"></select></div>
+          <div class="input-group"><label>Executivo(a) de Trade</label><select id="lid_exec_trade"></select></div>
+          <div class="input-group"><label>Coordenador(a) de Trade</label><select id="lid_coord_trade"></select></div>
+          <div class="input-group"><label>Executivo(a) de Vendas</label><select id="lid_exec_vendas"></select></div>
+          <div class="input-group"><label>Gerente de Vendas</label><select id="lid_ger_vendas"></select></div>
+          <div class="input-group"><label>Gerente Regional</label><select id="lid_ger_regional"></select></div>
+        </div>
+
         <div id="save-status" class="status-msg"></div>
         <button type="submit" class="btn" style="position:sticky; bottom:20px; box-shadow:0 10px 20px rgba(0,0,0,0.5);">Salvar Tudo</button>
         <button type="button" class="btn btn-secondary" onclick="verNoApp()">Ver no App</button>
@@ -276,6 +287,62 @@
       catch (error) { errorDiv.innerText = "Erro: " + error.message; }
     });
     function fazerLogout() { auth.signOut(); }
+
+    // BANCO DE DADOS DE LÍDERES
+    const BANCO_LIDERES = {
+      "Supervisor de Trade": [
+        { nome: "Isis Colicigno", foto: "./Isis.supervisora.jfif" },
+        { nome: "Adriana Seixas", foto: "./Adriana.Seixas.Supervisora-trade.jfif" },
+        { nome: "Adriano Silva", foto: "./Adriano.silva.supervisor-trade.jfif" },
+        { nome: "Allan Costa", foto: "./Allan.Costa-supervisor-trade.jfif" },
+        { nome: "Brandon Braga", foto: "./Brandon.braga-supervisor-trade.jfif" },
+        { nome: "Fernanda Souza", foto: "./Fernanda.souza-supervisora.jfif" },
+        { nome: "Gustavo Nascimento", foto: "./Gustavo Nascimento-supervisor-trade.jfif" },
+        { nome: "Renato Oliveira", foto: "./Renato Oliveira-supervisor-trade.jfif" }
+      ],
+      "Executivo de Trade": [
+        { nome: "Joyce Santiago", foto: "./Joyce.executiva.jfif" }
+      ],
+      "Coordenador de Trade": [
+        { nome: "Ana Luiza Moraes", foto: "./ana luiza.cordenadora.jfif" }
+      ],
+      "Executivo de Vendas": [
+        { nome: "Celso Junior", foto: "./celsojunior.executivo de vendas.jfif" },
+        { nome: "Danieli Ramos", foto: "./Danieli.Ramos-Executiva-vendas.jfif" },
+        { nome: "Luan Simas", foto: "./Luan Simas.executivo-vendas.jfif" }
+      ],
+      "Gerente de Vendas": [
+        { nome: "Rodrigo Balbi", foto: "./RodrigoBalbi.gerentedevendas.jfif" },
+        { nome: "Felipe Almada", foto: "./felipe.almada.gerente vendas.jfif" }
+      ],
+      "Gerente Regional": [
+        { nome: "Fernando Auger", foto: "./Fernando Auger.gerenteregional.jfif" }
+      ]
+    };
+
+    function inicializarDropdownsLideranca() {
+      const mapSelects = {
+        "Supervisor de Trade": "lid_supervisor",
+        "Executivo de Trade": "lid_exec_trade",
+        "Coordenador de Trade": "lid_coord_trade",
+        "Executivo de Vendas": "lid_exec_vendas",
+        "Gerente de Vendas": "lid_ger_vendas",
+        "Gerente Regional": "lid_ger_regional"
+      };
+      for (const [cargo, selectId] of Object.entries(mapSelects)) {
+        const select = document.getElementById(selectId);
+        select.innerHTML = '';
+        BANCO_LIDERES[cargo].forEach(pessoa => {
+          const opt = document.createElement('option');
+          opt.value = pessoa.nome;
+          opt.textContent = pessoa.nome;
+          select.appendChild(opt);
+        });
+      }
+    }
+
+    // Inicializa na abertura
+    inicializarDropdownsLideranca();
 
     // RENDERIZAR CONTRATOS DINÂMICOS
     let blocosContratuais = [];
@@ -374,6 +441,20 @@
           document.getElementById('kpi_vol').value = data.kpis.volume_hl || 0;
           document.getElementById('kpi_mix').value = data.kpis.mix_premium || 0;
 
+          // Liderança
+          const lideranca = data.lideranca || [];
+          const findLeader = (nomeDesejado) => {
+             const found = lideranca.find(p => p.nome === nomeDesejado);
+             return found ? found.nome : "";
+          };
+          
+          document.getElementById('lid_supervisor').value = lideranca[0] ? lideranca[0].nome : BANCO_LIDERES["Supervisor de Trade"][0].nome;
+          document.getElementById('lid_exec_trade').value = lideranca[1] ? lideranca[1].nome : BANCO_LIDERES["Executivo de Trade"][0].nome;
+          document.getElementById('lid_coord_trade').value = lideranca[2] ? lideranca[2].nome : BANCO_LIDERES["Coordenador de Trade"][0].nome;
+          document.getElementById('lid_exec_vendas').value = lideranca[3] ? lideranca[3].nome : BANCO_LIDERES["Executivo de Vendas"][0].nome;
+          document.getElementById('lid_ger_vendas').value = lideranca[4] ? lideranca[4].nome : BANCO_LIDERES["Gerente de Vendas"][0].nome;
+          document.getElementById('lid_ger_regional').value = lideranca[5] ? lideranca[5].nome : BANCO_LIDERES["Gerente Regional"][0].nome;
+
           // Contratos
           document.getElementById('contrato_vigente').checked = !!(data.contrato && data.contrato.vigente);
           blocosContratuais = (data.contrato && data.contrato.blocos_contratuais) ? JSON.parse(JSON.stringify(data.contrato.blocos_contratuais)) : [];
@@ -452,6 +533,14 @@
             ...lojaAtualData.kpis,
             faturamento_bruto: n('kpi_fat'), volume_hl: n('kpi_vol'), mix_premium: n('kpi_mix')
           },
+          lideranca: [
+            { id: 1, cargo: "Supervisor(a) de Trade", nome: v('lid_supervisor'), foto_perfil: BANCO_LIDERES["Supervisor de Trade"].find(p=>p.nome===v('lid_supervisor')).foto },
+            { id: 2, cargo: "Executivo(a) de Trade", nome: v('lid_exec_trade'), foto_perfil: BANCO_LIDERES["Executivo de Trade"].find(p=>p.nome===v('lid_exec_trade')).foto },
+            { id: 3, cargo: "Coordenador(a) de Trade", nome: v('lid_coord_trade'), foto_perfil: BANCO_LIDERES["Coordenador de Trade"].find(p=>p.nome===v('lid_coord_trade')).foto },
+            { id: 4, cargo: "Executivo(a) de Vendas", nome: v('lid_exec_vendas'), foto_perfil: BANCO_LIDERES["Executivo de Vendas"].find(p=>p.nome===v('lid_exec_vendas')).foto },
+            { id: 5, cargo: "Gerente de Vendas", nome: v('lid_ger_vendas'), foto_perfil: BANCO_LIDERES["Gerente de Vendas"].find(p=>p.nome===v('lid_ger_vendas')).foto },
+            { id: 6, cargo: "Gerente Regional", nome: v('lid_ger_regional'), foto_perfil: BANCO_LIDERES["Gerente Regional"].find(p=>p.nome===v('lid_ger_regional')).foto }
+          ],
           contrato: {
             ...lojaAtualData.contrato,
             vigente: c('contrato_vigente'),
