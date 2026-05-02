@@ -110,6 +110,20 @@
     #cinema-flash.on  { opacity: .85; }
     #cinema-flash.off { opacity: 0; transition: opacity .35s ease; }
 
+    /* ─── TELA 0.5: CHOICE SCREEN ─────────────────────────── */
+    #choice-screen {
+      position: fixed; inset: 0; z-index: 8890;
+      background: var(--dark);
+      max-width: 480px; width: 100%; margin: 0 auto; left: 0; right: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity .6s ease;
+      padding: 20px;
+    }
+    #choice-screen.visible { opacity: 1; pointer-events: all; }
+    #choice-screen.fade-out { opacity: 0; pointer-events: none; }
+
     /* ─── MAIN APP ────────────────────────────────── */
     #app {
       opacity: 0; transition: opacity .9s ease;
@@ -537,6 +551,32 @@
     <p class="loading-text">Preparando experiência da loja…</p>
   </div>
 
+  <!-- TELA 0.5: Escolha de Perfil -->
+  <div id="choice-screen">
+    <div style="text-align: center; margin-bottom: 40px; animation: burstIn .55s .15s both;">
+      <h2 style="font-size: 1.8rem; font-weight: 800; color: #fff; margin-bottom: 8px;">Bem-vindo(a)!</h2>
+      <p style="color: var(--silver); font-size: 0.9rem;">Como você deseja acessar?</p>
+    </div>
+    
+    <div style="display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 320px;">
+      <button class="splash-btn" onclick="showSplash()" style="animation: burstIn .55s .3s both; background: linear-gradient(135deg, var(--green) 0%, var(--green-light) 100%);">
+        <span style="font-size: 1.4rem; margin-right: 10px;">👁️</span>
+        <div style="text-align: left; flex: 1;">
+          <div style="font-weight: 800; font-size: 1rem; color: #fff;">VISITANTE</div>
+          <div style="font-size: 0.65rem; color: rgba(255,255,255,0.8); text-transform: none; font-weight: 400;">Explorar dados da loja</div>
+        </div>
+      </button>
+
+      <button class="splash-btn" onclick="window.location.href='admin.html'" style="animation: burstIn .55s .45s both; background: linear-gradient(135deg, #162019 0%, #0f1e16 100%); border: 1px solid rgba(0,132,61,.3); color: var(--white); box-shadow: 0 8px 28px rgba(0,0,0,.4);">
+        <span style="font-size: 1.4rem; margin-right: 10px;">⚙️</span>
+        <div style="text-align: left; flex: 1;">
+          <div style="font-weight: 800; font-size: 1rem; color: var(--green-light);">ADMINISTRADOR</div>
+          <div style="font-size: 0.65rem; color: var(--silver); text-transform: none; font-weight: 400;">Editar dados e painel</div>
+        </div>
+      </button>
+    </div>
+  </div>
+
   <!-- TELA 1.5: Splash Boas-Vindas -->
   <div id="splash-screen">
     <div class="splash-bg" id="splash-bg"></div>
@@ -773,6 +813,7 @@
   <script>
     // ── Utils ──────────────────────────────────────────
     function formatDate(str) {
+      if (!str) return 'Não informada';
       const [y, m, d] = str.split('-');
       return `${d}/${m}/${y}`;
     }
@@ -792,9 +833,10 @@
       document.getElementById('prom-foto').src = promotor.foto_perfil || fallbackPromotor;
       document.getElementById('prom-nome').textContent = promotor.nome;
 
-      // Calcula tempo automaticamente a partir de uma data ISO
       function calcTempo(dataISO) {
+        if (!dataISO) return 'Não informada';
         const inicio = new Date(dataISO);
+        if (isNaN(inicio.getTime())) return 'Não informada';
         const hoje = new Date();
         let anos = hoje.getFullYear() - inicio.getFullYear();
         let meses = hoje.getMonth() - inicio.getMonth();
@@ -885,14 +927,16 @@
           </div>
         `;
         const catNames = { 'craft': 'Craft', 'premium': 'Premium', 'mainstream': 'Mainstream' };
+        const ruleMetas = { 'craft': 53, 'premium': 57, 'mainstream': 25 };
         for (let key in sovi.share_categorias) {
           let cat = sovi.share_categorias[key];
+          let currentMeta = ruleMetas[key] !== undefined ? ruleMetas[key] : cat.meta;
           soviHtml += `
             <div class="sovi-item">
-              <div class="sovi-header"><strong>${catNames[key] || key}</strong><span>${cat.atual}% (Meta: ${cat.meta}%)</span></div>
+              <div class="sovi-header"><strong>${catNames[key] || key}</strong><span>${cat.atual}% (Meta: ${currentMeta}%)</span></div>
               <div class="bar-container">
                 <div class="bar-fill" style="width:${Math.min(cat.atual, 100)}%"></div>
-                <div class="bar-meta" style="left:${Math.min(cat.meta, 100)}%;"></div>
+                <div class="bar-meta" style="left:${Math.min(currentMeta, 100)}%;"></div>
               </div>
             </div>
           `;
@@ -1024,6 +1068,35 @@
       }, 850);
     }
 
+    function showSplash() {
+      const choice = document.getElementById('choice-screen');
+      const splash = document.getElementById('splash-screen');
+      const flash = document.getElementById('cinema-flash');
+      const bg = document.getElementById('splash-bg');
+
+      choice.classList.add('fade-out');
+      setTimeout(() => {
+        choice.style.display = 'none';
+        
+        // Flash again for transition to splash
+        flash.classList.remove('off');
+        flash.classList.add('on');
+        setTimeout(() => {
+          flash.classList.remove('on');
+          flash.classList.add('off');
+        }, 120);
+
+        setTimeout(() => {
+          splash.classList.add('visible');
+          setTimeout(() => {
+            bg.classList.add('reveal');
+            setTimeout(() => bg.classList.add('zoomed'), 80);
+          }, 100);
+        }, 200);
+
+      }, 400);
+    }
+
     async function init() {
       try {
         const urlParams = new URLSearchParams(window.location.search);
@@ -1059,7 +1132,7 @@
 
         const ls    = document.getElementById('loading-screen');
         const flash = document.getElementById('cinema-flash');
-        const splash = document.getElementById('splash-screen');
+        const choice = document.getElementById('choice-screen');
 
         // ATO 1: Loading explode-out
         ls.classList.add('fade-out');
@@ -1073,16 +1146,10 @@
           }, 120);
         }, 400);
 
-        // ATO 3: Splash emerge do escuro (aos 600ms)
+        // ATO 3: Choice emerge do escuro (aos 600ms)
         setTimeout(() => {
           ls.style.display = 'none';
-          splash.classList.add('visible');
-
-          // Foto vai de brightness(0) → .75 com ramp cinematográfico
-          setTimeout(() => {
-            bg.classList.add('reveal');
-            setTimeout(() => bg.classList.add('zoomed'), 80);
-          }, 100);
+          choice.classList.add('visible');
         }, 600);
 
       } catch (err) {

@@ -12,24 +12,25 @@
 </head>
 <body>
   <h2>Migração de Dados: JSON -> Firestore</h2>
-  <button onclick="migrarDados()" style="padding: 15px 30px; font-size: 1.2rem; cursor:pointer; background: #00843D; color: white; border: none; border-radius: 8px;">Enviar Mundial para Nuvem</button>
+  <button onclick="migrarDados()" style="padding: 15px 30px; font-size: 1.2rem; cursor:pointer; background: #00843D; color: white; border: none; border-radius: 8px;">Enviar Todas as Lojas para Nuvem</button>
   <p id="status" style="margin-top: 20px; color: #e8c547;"></p>
 
   <script>
     async function migrarDados() {
       const status = document.getElementById('status');
-      status.innerText = "Lendo arquivo local...";
+      status.innerText = "Lendo arquivos locais...";
+      const lojas = ['mundial_abelardo', 'zonasul_diasferreira', 'paodeacucar_leblon'];
+      
       try {
-        const res = await fetch('./lojas/mundial_abelardo.json');
-        const data = await res.json();
-        
-        status.innerText = "Conectando ao Firestore...";
-        
-        // Salvando no Firestore na coleção "lojas" sob o documento "mundial_abelardo"
-        await db.collection("lojas").doc("mundial_abelardo").set(data);
+        status.innerText = "Conectando ao Firestore e enviando...";
+        for (let lojaId of lojas) {
+          const res = await fetch(`./lojas/${lojaId}.json`);
+          const data = await res.json();
+          await db.collection("lojas").doc(lojaId).set(data);
+        }
         
         status.style.color = "#00ff00";
-        status.innerText = "✅ SUCESSO! Dados do Mundial foram salvos na nuvem.";
+        status.innerText = "✅ SUCESSO! Dados de todas as lojas foram salvos na nuvem.";
       } catch (e) {
         console.error(e);
         status.style.color = "red";

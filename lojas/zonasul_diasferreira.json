@@ -1,0 +1,109 @@
+{
+  "loja": {
+    "id": "zonasul_diasferreira",
+    "nome": "Zona Sul Dias Ferreira",
+    "endereco": "R. Dias Ferreira - Leblon, Rio de Janeiro - RJ",
+    "data_inauguracao": "",
+    "checkouts": 13,
+    "area_vendas_m2": 0,
+    "tipo": "Supermercado",
+    "imagem_fachada": ""
+  },
+  "promotor": {
+    "nome": "Debora Rodrigues da Silva",
+    "idade": 52,
+    "data_entrada_cia": "2025-04-02",
+    "data_entrada_loja": "2025-04-24",
+    "paixao": "Passear com meu esposo, curtir um barzinho com música ao vivo",
+    "valor_cia": "PAIXÃO",
+    "foto_perfil": "./debora.promotora.jpeg"
+  },
+  "lideranca": [
+    {
+      "id": 1,
+      "nome": "Isis Colicigno",
+      "cargo": "Supervisora de Trade",
+      "foto_perfil": "./Isis.supervisora.jfif"
+    },
+    {
+      "id": 2,
+      "nome": "Joyce Santiago",
+      "cargo": "Executivo de Trade",
+      "foto_perfil": "./Joyce.executiva.jfif"
+    },
+    {
+      "id": 3,
+      "nome": "Ana Luiza Moraes",
+      "cargo": "Coordenadora de Trade",
+      "foto_perfil": "./ana luiza.cordenadora.jfif"
+    },
+    {
+      "id": 4,
+      "nome": "Celso Junior",
+      "cargo": "Executivo de Vendas",
+      "foto_perfil": "./celsojunior.executivo de vendas.jfif"
+    },
+    {
+      "id": 5,
+      "nome": "Rodrigo Balbi",
+      "cargo": "Gerente de Vendas",
+      "foto_perfil": "./RodrigoBalbi.gerentedevendas.jfif"
+    },
+    {
+      "id": 6,
+      "nome": "Fernando Auger",
+      "cargo": "Gerente Regional",
+      "foto_perfil": "./Fernando Auger.gerenteregional.jfif"
+    }
+  ],
+  "contrato": {
+    "vigente": true,
+    "tipo": "JBP",
+    "blocos_contratuais": [
+      {
+        "titulo": "Contrapartidas",
+        "itens": [
+          "35% SOVI de gôndola",
+          "35% SOVI ponto refrigerado",
+          "35% Pontos extras",
+          "Layout dentro dos 35%"
+        ]
+      }
+    ],
+    "cumprindo_acordado": true
+  },
+  "fds_2026": {
+    "pontuacao_atual": 94,
+    "itens_obrigatorios_cadastrados": true,
+    "sovi": {
+      "share_total": 35.0,
+      "share_categorias": {
+        "craft": { "atual": 56, "meta": 53 },
+        "premium": { "atual": 58, "meta": 57 },
+        "mainstream": { "atual": 39, "meta": 25 }
+      }
+    },
+    "pontos_extras": {
+      "percentual_cia_vs_concorrencia": 35.0,
+      "total_loja": 8,
+      "pe_categorias": {
+        "craft": { "atual": 1, "meta": 1 },
+        "premium": { "atual": 2, "meta": 2 },
+        "mainstream": { "atual": 1, "meta": 1 }
+      },
+      "atinge_meta": true,
+      "tem_display": false
+    },
+    "refrigeradores": {
+      "cia_quantidade": 1,
+      "concorrencia_quantidade": 6,
+      "capacidade_padrao": "Equipamentos com 4 níveis/prateleiras",
+      "tem_refrigerador_cinza_na_loja": true
+    }
+  },
+  "kpis": {
+    "faturamento_bruto": 0,
+    "volume_hl": 0,
+    "mix_premium": 0
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "loja": {
+    "id": "paodeacucar_leblon",
+    "nome": "Pão de Açúcar Leblon",
+    "endereco": "Leblon, Rio de Janeiro - RJ",
+    "data_inauguracao": "",
+    "checkouts": 10,
+    "area_vendas_m2": 0,
+    "tipo": "Supermercado GG",
+    "imagem_fachada": ""
+  },
+  "promotor": {
+    "nome": "Rodrigo de Sousa Coutinho",
+    "idade": 40,
+    "data_entrada_cia": "2024-07-03",
+    "data_entrada_loja": "2025-04-01",
+    "paixao": "Eternizar momentos com meus filhos",
+    "valor_cia": "CUIDADO E RESPEITO",
+    "foto_perfil": "./rodrigo.promotor.jpeg"
+  },
+  "lideranca": [
+    {
+      "id": 1,
+      "nome": "Isis Colicigno",
+      "cargo": "Supervisora de Trade",
+      "foto_perfil": "./Isis.supervisora.jfif"
+    },
+    {
+      "id": 2,
+      "nome": "Joyce Santiago",
+      "cargo": "Executivo de Trade",
+      "foto_perfil": "./Joyce.executiva.jfif"
+    },
+    {
+      "id": 3,
+      "nome": "Ana Luiza Moraes",
+      "cargo": "Coordenadora de Trade",
+      "foto_perfil": "./ana luiza.cordenadora.jfif"
+    },
+    {
+      "id": 4,
+      "nome": "Luan Simas",
+      "cargo": "Executivo de Vendas",
+      "foto_perfil": "./Luan Simas.executivo-vendas.jfif"
+    },
+    {
+      "id": 5,
+      "nome": "Rodrigo Balbi",
+      "cargo": "Gerente de Vendas",
+      "foto_perfil": "./RodrigoBalbi.gerentedevendas.jfif"
+    },
+    {
+      "id": 6,
+      "nome": "Fernando Auger",
+      "cargo": "Gerente Regional",
+      "foto_perfil": "./Fernando Auger.gerenteregional.jfif"
+    }
+  ],
+  "contrato": {
+    "vigente": true,
+    "tipo": "JBP",
+    "blocos_contratuais": [
+      {
+        "titulo": "Contrapartidas",
+        "itens": [
+          "45% share gôndola",
+          "50% dos pontos extras",
+          "50% de geladeira",
+          "No mínimo 7 pontos extras (loja GG)",
+          "Praya e Sol obrigatoriamente ao lado de Corona"
+        ]
+      }
+    ],
+    "cumprindo_acordado": true
+  },
+  "fds_2026": {
+    "pontuacao_atual": 67,
+    "itens_obrigatorios_cadastrados": true,
+    "sovi": {
+      "share_total": 46.66,
+      "share_categorias": {
+        "craft": { "atual": 60, "meta": 53 },
+        "premium": { "atual": 40, "meta": 57 },
+        "mainstream": { "atual": 40, "meta": 25 }
+      }
+    },
+    "pontos_extras": {
+      "percentual_cia_vs_concorrencia": 50.0,
+      "total_loja": 19,
+      "pe_categorias": {
+        "craft": { "atual": 1, "meta": 1 },
+        "premium": { "atual": 9, "meta": 4 },
+        "mainstream": { "atual": 2, "meta": 2 }
+      },
+      "atinge_meta": true,
+      "tem_display": true
+    },
+    "refrigeradores": {
+      "cia_quantidade": 9,
+      "concorrencia_quantidade": 8,
+      "capacidade_padrao": "Equipamentos com 4 níveis/prateleiras",
+      "tem_refrigerador_cinza_na_loja": true
+    }
+  },
+  "kpis": {
+    "faturamento_bruto": 0,
+    "volume_hl": 0,
+    "mix_premium": 0
+  }
+}
