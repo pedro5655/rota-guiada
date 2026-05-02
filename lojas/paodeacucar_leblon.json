@@ -3,11 +3,12 @@
     "id": "paodeacucar_leblon",
     "nome": "Pão de Açúcar Leblon",
     "endereco": "Leblon, Rio de Janeiro - RJ",
-    "data_inauguracao": "",
+    "data_inauguracao": "2011",
+    "data_reinauguracao": "2025",
     "checkouts": 10,
-    "area_vendas_m2": 0,
+    "area_vendas_m2": 2900,
     "tipo": "Supermercado GG",
-    "imagem_fachada": ""
+    "imagem_fachada": "./Fachada Pão de açucar leblon.png"
   },
   "promotor": {
     "nome": "Rodrigo de Sousa Coutinho",
@@ -15,6 +16,7 @@
     "data_entrada_cia": "2024-07-03",
     "data_entrada_loja": "2025-04-01",
     "paixao": "Eternizar momentos com meus filhos",
+    "icone_paixao": "👨‍👩‍👧‍👦",
     "valor_cia": "CUIDADO E RESPEITO",
     "foto_perfil": "./rodrigo.promotor.jpeg"
   },

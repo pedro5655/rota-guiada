@@ -3,11 +3,12 @@
     "id": "zonasul_diasferreira",
     "nome": "Zona Sul Dias Ferreira",
     "endereco": "R. Dias Ferreira - Leblon, Rio de Janeiro - RJ",
-    "data_inauguracao": "",
+    "data_inauguracao": "1990",
+    "data_reinauguracao": "2020",
     "checkouts": 13,
     "area_vendas_m2": 0,
     "tipo": "Supermercado",
-    "imagem_fachada": ""
+    "imagem_fachada": "./Fachada Zonasul DiasFerreira.png"
   },
   "promotor": {
     "nome": "Debora Rodrigues da Silva",
@@ -15,8 +16,9 @@
     "data_entrada_cia": "2025-04-02",
     "data_entrada_loja": "2025-04-24",
     "paixao": "Passear com meu esposo, curtir um barzinho com música ao vivo",
+    "icone_paixao": "🥂",
     "valor_cia": "PAIXÃO",
-    "foto_perfil": "./debora.promotora.jpeg"
+    "foto_perfil": "./debora.promotora.png"
   },
   "lideranca": [
     {

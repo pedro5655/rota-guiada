@@ -814,6 +814,7 @@
     // ── Utils ──────────────────────────────────────────
     function formatDate(str) {
       if (!str) return 'Não informada';
+      if (str.length === 4) return str;
       const [y, m, d] = str.split('-');
       return `${d}/${m}/${y}`;
     }
@@ -851,7 +852,7 @@
         { icon: '🎂', label: 'Idade', val: promotor.idade + ' anos' },
         { icon: '🏢', label: 'Tempo de Casa', val: calcTempo(promotor.data_entrada_cia) },
         { icon: '🛍️', label: 'Tempo de Loja', val: calcTempo(promotor.data_entrada_loja) },
-        { icon: '🎵', label: 'Paixão', val: promotor.paixao },
+        { icon: promotor.icone_paixao || '🎵', label: 'Paixão', val: promotor.paixao },
         { icon: '💚', label: 'Valor Heineken', val: promotor.valor_cia },
       ];
       document.getElementById('prom-chips').innerHTML = chips.map(c => `
@@ -1121,11 +1122,23 @@
         document.getElementById('splash-address').textContent = data.loja.endereco || '';
 
         // Chips de métricas de loja na splash
-        document.getElementById('splash-store-meta').innerHTML = `
-          <span style="display:flex;align-items:center;gap:6px;background:rgba(0,132,61,.12);border:1px solid rgba(0,132,61,.3);border-radius:20px;padding:5px 12px;font-size:.72rem;color:var(--white);">🛒 <span style='color:var(--silver)'>Checkouts</span>&nbsp;<b>${data.loja.checkouts}</b></span>
-          <span style="display:flex;align-items:center;gap:6px;background:rgba(0,132,61,.12);border:1px solid rgba(0,132,61,.3);border-radius:20px;padding:5px 12px;font-size:.72rem;color:var(--white);">📏 <span style='color:var(--silver)'>Área</span>&nbsp;<b>${formatNum(data.loja.area_vendas_m2)} m²</b></span>
-          <span style="display:flex;align-items:center;gap:6px;background:rgba(0,132,61,.12);border:1px solid rgba(0,132,61,.3);border-radius:20px;padding:5px 12px;font-size:.72rem;color:var(--white);">📅 <span style='color:var(--silver)'>Inauguração</span>&nbsp;<b>${formatDate(data.loja.data_inauguracao)}</b></span>
-        `;
+        let metaHtml = `
+          <span style="display:flex;align-items:center;gap:6px;background:rgba(0,132,61,.12);border:1px solid rgba(0,132,61,.3);border-radius:20px;padding:5px 12px;font-size:.72rem;color:var(--white);">🛒 <span style='color:var(--silver)'>Checkouts</span>&nbsp;<b>${data.loja.checkouts}</b></span>`;
+        
+        if (data.loja.area_vendas_m2 && data.loja.area_vendas_m2 > 0) {
+          metaHtml += `
+          <span style="display:flex;align-items:center;gap:6px;background:rgba(0,132,61,.12);border:1px solid rgba(0,132,61,.3);border-radius:20px;padding:5px 12px;font-size:.72rem;color:var(--white);">📏 <span style='color:var(--silver)'>Área</span>&nbsp;<b>${formatNum(data.loja.area_vendas_m2)} m²</b></span>`;
+        }
+
+        metaHtml += `
+          <span style="display:flex;align-items:center;gap:6px;background:rgba(0,132,61,.12);border:1px solid rgba(0,132,61,.3);border-radius:20px;padding:5px 12px;font-size:.72rem;color:var(--white);">📅 <span style='color:var(--silver)'>Inauguração</span>&nbsp;<b>${formatDate(data.loja.data_inauguracao)}</b></span>`;
+          
+        if (data.loja.data_reinauguracao) {
+          metaHtml += `
+          <span style="display:flex;align-items:center;gap:6px;background:rgba(0,132,61,.12);border:1px solid rgba(0,132,61,.3);border-radius:20px;padding:5px 12px;font-size:.72rem;color:var(--white);">✨ <span style='color:var(--silver)'>Reinauguração</span>&nbsp;<b>${formatDate(data.loja.data_reinauguracao)}</b></span>`;
+        }
+        
+        document.getElementById('splash-store-meta').innerHTML = metaHtml;
 
         // ── Aguarda 3s de loading ──
         await new Promise(r => setTimeout(r, 3000));
