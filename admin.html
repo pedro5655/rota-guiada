@@ -146,7 +146,8 @@
           <div class="input-group"><label>Endereço</label><input type="text" id="loja_endereco" required></div>
           <div class="row">
             <div class="input-group"><label>Tipo</label><input type="text" id="loja_tipo"></div>
-            <div class="input-group"><label>Inauguração</label><input type="date" id="loja_inauguracao"></div>
+            <div class="input-group"><label>Inauguração</label><input type="text" id="loja_inauguracao" placeholder="Ex: 2011"></div>
+            <div class="input-group"><label>Reinauguração</label><input type="text" id="loja_reinauguracao" placeholder="Ex: 2025"></div>
           </div>
           <div class="row">
             <div class="input-group"><label>Checkouts</label><input type="number" id="loja_checkouts" required></div>
@@ -162,6 +163,7 @@
           <div class="row">
             <div class="input-group"><label>Idade (anos)</label><input type="number" id="prom_idade"></div>
             <div class="input-group"><label>Paixão</label><input type="text" id="prom_paixao"></div>
+            <div class="input-group" style="max-width: 120px;"><label>Ícone Paixão</label><input type="text" id="prom_icone_paixao" placeholder="Ex: 🎵"></div>
           </div>
           <div class="input-group"><label>Valor Heineken que mais se identifica</label><input type="text" id="prom_valor"></div>
           <div class="row">
@@ -419,6 +421,7 @@
           document.getElementById('loja_endereco').value = data.loja.endereco || '';
           document.getElementById('loja_tipo').value = data.loja.tipo || '';
           document.getElementById('loja_inauguracao').value = data.loja.data_inauguracao || '';
+          document.getElementById('loja_reinauguracao').value = data.loja.data_reinauguracao || '';
           document.getElementById('loja_checkouts').value = data.loja.checkouts || 0;
           document.getElementById('loja_area').value = data.loja.area_vendas_m2 || 0;
           document.getElementById('loja_foto').value = data.loja.imagem_fachada || '';
@@ -427,6 +430,7 @@
           document.getElementById('prom_nome').value = data.promotor.nome || '';
           document.getElementById('prom_idade').value = data.promotor.idade || '';
           document.getElementById('prom_paixao').value = data.promotor.paixao || '';
+          document.getElementById('prom_icone_paixao').value = data.promotor.icone_paixao || '';
           document.getElementById('prom_valor').value = data.promotor.valor_cia || '';
           document.getElementById('prom_data_cia').value = data.promotor.data_entrada_cia || '';
           document.getElementById('prom_data_loja').value = data.promotor.data_entrada_loja || '';
@@ -518,12 +522,12 @@
           loja: {
             ...lojaAtualData.loja,
             nome: v('loja_nome'), endereco: v('loja_endereco'), tipo: v('loja_tipo'),
-            data_inauguracao: v('loja_inauguracao'), checkouts: n('loja_checkouts'),
+            data_inauguracao: v('loja_inauguracao'), data_reinauguracao: v('loja_reinauguracao'), checkouts: n('loja_checkouts'),
             area_vendas_m2: n('loja_area'), imagem_fachada: v('loja_foto')
           },
           promotor: {
             ...lojaAtualData.promotor,
-            nome: v('prom_nome'), idade: n('prom_idade'), paixao: v('prom_paixao'),
+            nome: v('prom_nome'), idade: n('prom_idade'), paixao: v('prom_paixao'), icone_paixao: v('prom_icone_paixao'),
             valor_cia: v('prom_valor'), data_entrada_cia: v('prom_data_cia'),
             data_entrada_loja: v('prom_data_loja'), foto_perfil: v('prom_foto')
           },
