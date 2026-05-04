@@ -360,6 +360,47 @@
       padding: 18px; margin-bottom: 16px;
       box-shadow: 0 10px 30px rgba(0,0,0,.4);
     }
+    .route-photo-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
+    .route-photo-card { overflow: hidden; padding: 0; cursor: pointer; transition: transform .18s ease, border-color .18s ease; }
+    .route-photo-card:hover { transform: translateY(-2px); border-color: var(--green-light); }
+    .route-photo-card img {
+      width: 100%; height: 118px; object-fit: contain; display: block;
+      background: rgba(255,255,255,.04);
+    }
+    .route-photo-caption {
+      padding: 10px 12px; font-size: .74rem; color: var(--white);
+      border-top: 1px solid rgba(255,255,255,.06);
+    }
+    .route-photo-caption span {
+      display: block; margin-top: 3px; color: var(--silver); font-size: .65rem;
+      text-transform: uppercase; letter-spacing: .08em;
+    }
+    .route-photo-toggle {
+      width: 100%; margin: 2px 0 18px; border: 1px solid rgba(0,132,61,.35);
+      background: rgba(0,132,61,.1); color: var(--green-light); border-radius: 12px;
+      padding: 12px; font-size: .74rem; font-weight: 800; letter-spacing: .08em;
+      text-transform: uppercase; cursor: pointer;
+    }
+    .photo-modal {
+      position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,.88);
+      display: none; align-items: center; justify-content: center; padding: 18px;
+      max-width: 480px; width: 100%; margin: 0 auto; left: 0; right: 0;
+    }
+    .photo-modal.visible { display: flex; }
+    .photo-modal-content {
+      width: 100%; max-height: 92vh; background: #0f1e16; border: 1px solid rgba(0,176,80,.35);
+      border-radius: 16px; overflow: hidden; box-shadow: 0 24px 80px rgba(0,0,0,.75);
+    }
+    .photo-modal-content img {
+      width: 100%; max-height: 70vh; object-fit: contain; display: block; background: #050806;
+    }
+    .photo-modal-caption { padding: 14px 16px 16px; }
+    .photo-modal-caption strong { display: block; color: var(--white); font-size: .95rem; margin-bottom: 4px; }
+    .photo-modal-caption span { color: var(--silver); font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; }
+    .photo-modal-close {
+      width: 100%; border: none; border-top: 1px solid rgba(255,255,255,.08); background: rgba(0,132,61,.18);
+      color: var(--green-light); padding: 13px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+    }
     .status-alert {
       display: flex; align-items: center; gap: 12px; padding: 14px;
       border-radius: 12px; font-size: .8rem; font-weight: 600;
@@ -434,30 +475,32 @@
     #splash-screen.fade-out { opacity: 0; pointer-events: none; }
 
     .splash-bg {
-      position: absolute; inset: 0;
-      background-size: 180% auto;
-      background-position: center 15%;
+      position: absolute; left: 0; right: 0; top: 0; height: 82vh;
+      background-size: 122% auto;
+      background-position: center 26%;
       background-repeat: no-repeat;
       transform: scale(1.08);
       transition: transform 7s ease, filter 1.4s ease;
-      filter: brightness(0) saturate(.9);
+      filter: brightness(0) saturate(1);
     }
     .splash-bg.zoomed  { transform: scale(1); }
-    .splash-bg.reveal  { filter: brightness(.75) saturate(.9); }
+    .splash-bg.reveal  { filter: brightness(.86) saturate(1); }
 
     .splash-overlay {
       position: absolute; inset: 0;
       background: linear-gradient(
         to bottom,
-        rgba(0,0,0,.05) 0%,
-        rgba(8,14,11,.35) 45%,
-        rgba(8,14,11,.95) 100%
+        rgba(0,0,0,.04) 0%,
+        rgba(0,0,0,.04) 30%,
+        rgba(8,14,11,.20) 46%,
+        rgba(8,14,11,.74) 70%,
+        rgba(8,14,11,.92) 100%
       );
     }
 
     .splash-content {
       position: relative; z-index: 2;
-      width: 100%; padding: 32px 28px 52px;
+      width: 100%; padding: 50vh 28px 52px;
       display: flex; flex-direction: column; align-items: flex-start; gap: 0;
     }
 
@@ -537,6 +580,17 @@
 
   <!-- CINEMA FLASH -->
   <div id="cinema-flash"></div>
+
+  <div class="photo-modal" id="photo-modal" onclick="fecharFotoModal()">
+    <div class="photo-modal-content" onclick="event.stopPropagation()">
+      <img id="photo-modal-img" alt="Foto da rota em destaque">
+      <div class="photo-modal-caption">
+        <strong id="photo-modal-title"></strong>
+        <span id="photo-modal-desc"></span>
+      </div>
+      <button type="button" class="photo-modal-close" onclick="fecharFotoModal()">Fechar</button>
+    </div>
+  </div>
 
   <!-- TELA 0: Loading Cinematográfico -->
   <div id="loading-screen">
@@ -643,9 +697,11 @@
       <div class="lideranca-grid" id="lideranca-grid"></div>
     </div>
 
+    <div id="rota-fotos-fachada"></div>
+
     <!-- SCROLL CTA -->
     <div class="scroll-cta slide-up" id="scroll-cta" style="cursor:pointer;" onclick="navTo(2)">
-      <p>Deslize para Visão Comercial</p>
+      <p>Continuar para Visão Comercial</p>
       <div class="scroll-arrow">↓</div>
     </div>
     
@@ -728,6 +784,8 @@
         </div>
         <div class="card-dark" id="sovi-container"></div>
 
+        <div id="rota-fotos-gondola"></div>
+
         <div class="section-header" style="margin-top:24px;">
           <span class="section-title">Pontos Extras</span>
         </div>
@@ -756,6 +814,8 @@
           <div id="pe-alert" class="status-alert" style="margin-top:16px;"></div>
         </div>
 
+        <div id="rota-fotos-ponto-extra"></div>
+
         <div class="section-header" style="margin-top:24px;">
           <span class="section-title">Equipamentos Gelados</span>
         </div>
@@ -773,6 +833,8 @@
           </div>
           <div class="tech-note" id="gel-note"></div>
         </div>
+
+        <div id="rota-fotos-geladeira"></div>
 
         <div class="section-header" style="margin-top:24px;">
           <span class="section-title">Checklist de Auditoria</span>
@@ -793,6 +855,8 @@
             </li>
           </ul>
         </div>
+
+        <div id="rota-fotos-outros"></div>
 
         <!-- ── FEEDBACK CTA ── -->
         <div class="card-dark slide-up" style="margin-top: 40px; margin-bottom: 40px; text-align: center; border: 1px solid var(--green); background: rgba(0, 132, 61, 0.05);">
@@ -822,12 +886,86 @@
       return Number(n).toLocaleString('pt-BR');
     }
 
+    function escapeHtml(value) {
+      return String(value || '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+      }[char]));
+    }
+
+    function renderFotosDaRota(fotos = []) {
+      const etapaConfig = {
+        fachada: { target: 'rota-fotos-fachada', title: 'Fotos da Entrada & Corredores' },
+        gondola: { target: 'rota-fotos-gondola', title: 'Fotos da Gôndola' },
+        ponto_extra: { target: 'rota-fotos-ponto-extra', title: 'Fotos dos Pontos Extras' },
+        geladeira: { target: 'rota-fotos-geladeira', title: 'Fotos dos Equipamentos Gelados' },
+        outros: { target: 'rota-fotos-outros', title: 'Outras Fotos da Loja' }
+      };
+
+      Object.values(etapaConfig).forEach(config => {
+        const el = document.getElementById(config.target);
+        if (el) el.innerHTML = '';
+      });
+
+      if (!Array.isArray(fotos) || !fotos.length) return;
+
+      Object.entries(etapaConfig).forEach(([etapa, config]) => {
+        const etapaFotos = fotos
+          .filter(foto => foto && foto.url && foto.etapa === etapa)
+          .sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
+        const target = document.getElementById(config.target);
+        if (!target || !etapaFotos.length) return;
+
+        const collapsed = etapaFotos.length > 4;
+        const hiddenClass = collapsed ? ' route-photo-extra' : '';
+        target.innerHTML = `
+          <div class="section-header" style="margin-top:24px;">
+            <span class="section-title">${config.title}</span>
+          </div>
+          <div class="route-photo-grid">
+            ${etapaFotos.map((foto, index) => `
+              <div class="card-dark route-photo-card${index >= 4 ? hiddenClass : ''}" style="${index >= 4 && collapsed ? 'display:none;' : ''}" onclick="abrirFotoModal('${escapeHtml(foto.url)}', '${escapeHtml(foto.titulo || config.title)}', '${escapeHtml(config.title)}')">
+                <img src="${escapeHtml(foto.url)}" alt="${escapeHtml(foto.titulo || config.title)}" loading="lazy">
+                <div class="route-photo-caption">
+                  ${escapeHtml(foto.titulo || config.title)}
+                  <span>Registro da rota guiada</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+          ${collapsed ? `<button type="button" class="route-photo-toggle" onclick="toggleFotosRota('${config.target}', this)">Ver mais fotos (${etapaFotos.length - 4})</button>` : ''}
+        `;
+      });
+    }
+
+    function toggleFotosRota(targetId, button) {
+      const target = document.getElementById(targetId);
+      if (!target) return;
+      const extras = target.querySelectorAll('.route-photo-extra');
+      const shouldShow = Array.from(extras).some(el => el.style.display === 'none');
+      extras.forEach(el => { el.style.display = shouldShow ? '' : 'none'; });
+      button.textContent = shouldShow ? 'Ver menos fotos' : `Ver mais fotos (${extras.length})`;
+    }
+
+    function abrirFotoModal(url, titulo, descricao) {
+      document.getElementById('photo-modal-img').src = url;
+      document.getElementById('photo-modal-title').textContent = titulo;
+      document.getElementById('photo-modal-desc').textContent = descricao || 'Registro da rota guiada';
+      document.getElementById('photo-modal').classList.add('visible');
+    }
+
+    function fecharFotoModal() {
+      const modal = document.getElementById('photo-modal');
+      modal.classList.remove('visible');
+      document.getElementById('photo-modal-img').removeAttribute('src');
+    }
+
     // ── Render App ─────────────────────────────────────
     function renderApp(data) {
       const { loja, promotor, lideranca, contrato, fds_2026 } = data;
 
       // Top bar da Tela 2
       document.getElementById('app-store-nome').textContent = loja.nome;
+      renderFotosDaRota(loja.fotos_rota || []);
 
       // PROMOTOR
       const fallbackPromotor = `https://ui-avatars.com/api/?name=${encodeURIComponent(promotor.nome)}&background=00843D&color=fff&size=200`;

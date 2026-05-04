@@ -42,7 +42,7 @@
     .input-group { margin-bottom: 12px; }
     .input-group label { display: block; font-size: 0.75rem; color: var(--silver); margin-bottom: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
     
-    input[type="text"], input[type="email"], input[type="password"], input[type="number"], input[type="date"], select, textarea {
+    input[type="text"], input[type="email"], input[type="password"], input[type="number"], input[type="date"], select, textarea, input[type="file"] {
       width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--card-border);
       background: rgba(255,255,255,0.05); color: var(--white); font-size: 0.95rem; outline: none;
       transition: border-color 0.2s; font-family: inherit;
@@ -83,6 +83,49 @@
     .feedback-stars { color: var(--gold); font-size: 1.2rem; margin-bottom: 5px; }
     .feedback-autor { font-size: 0.8rem; color: var(--silver); margin-bottom: 10px; }
     .feedback-text { font-size: 0.95rem; line-height: 1.4; color: var(--white); }
+
+    .photo-uploader { border: 1px solid rgba(0,132,61,0.25); background: rgba(0,132,61,0.06); border-radius: 12px; padding: 14px; margin-top: 12px; }
+    .photo-preview { width: 100%; min-height: 140px; max-height: 220px; border-radius: 10px; border: 1px solid var(--card-border); object-fit: cover; background: rgba(255,255,255,0.04); display: none; margin: 10px 0; }
+    .photo-status { min-height: 18px; margin-top: 8px; color: var(--green-light); font-size: 0.75rem; line-height: 1.35; }
+    .route-photo-item { display: grid; grid-template-columns: 84px 1fr; gap: 12px; align-items: center; padding: 10px; border: 1px solid var(--card-border); border-radius: 10px; background: rgba(255,255,255,0.04); margin-top: 10px; }
+    .route-photo-item img { width: 84px; height: 70px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); }
+    .route-photo-meta { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .route-photo-meta strong { font-size: 0.86rem; color: var(--white); }
+    .route-photo-meta span { font-size: 0.72rem; color: var(--silver); }
+    .route-photo-actions { display: flex; gap: 8px; margin-top: 8px; }
+    .mini-btn { border: 1px solid var(--card-border); background: rgba(255,255,255,0.04); color: var(--silver); border-radius: 8px; padding: 7px 9px; font-size: 0.72rem; cursor: pointer; }
+    .mini-btn.danger { color: #ff6b6b; border-color: rgba(235,87,87,0.5); }
+    .mini-select { width: auto; min-width: 132px; padding: 7px 8px; font-size: 0.72rem; border-radius: 8px; }
+
+    @media (max-width: 480px) {
+      body { padding: 12px; align-items: flex-start; }
+      .container { max-width: 100%; padding-bottom: 120px; }
+      h1 { font-size: 1.22rem; margin-bottom: 18px; text-align: left; }
+      h2 { font-size: 1rem; line-height: 1.25; }
+      .top-bar { align-items: stretch; gap: 12px; }
+      .top-bar h1 { width: 100%; margin-bottom: 0; }
+      .top-bar > div { width: 100%; justify-content: space-between; }
+      .top-bar .btn { flex: 1; min-height: 42px; }
+      .logout-btn { min-width: 64px; text-align: center; border: 1px solid var(--card-border); border-radius: 8px; }
+      .card { padding: 16px; margin-bottom: 18px; border-radius: 10px; }
+      .row { flex-direction: column; gap: 0; }
+      .row .input-group { width: 100%; flex: none; }
+      .row .input-group[style*="max-width"] { max-width: none !important; }
+      input[type="text"], input[type="email"], input[type="password"], input[type="number"], input[type="date"], select, textarea, input[type="file"] {
+        font-size: 16px; min-height: 44px;
+      }
+      .checkbox-group { align-items: flex-start; }
+      .checkbox-group label { line-height: 1.35; }
+      .photo-uploader { padding: 12px; }
+      .photo-preview { min-height: 120px; max-height: 180px; }
+      .route-photo-item { grid-template-columns: 72px 1fr; gap: 10px; }
+      .route-photo-item img { width: 72px; height: 64px; }
+      .route-photo-actions { flex-wrap: wrap; }
+      .mini-btn { min-height: 36px; }
+      .mini-select { width: 100%; min-height: 36px; }
+      #edit-form > .btn { min-height: 48px; }
+      #edit-form > .btn[style*="sticky"] { bottom: 12px !important; border-radius: 12px; }
+    }
   </style>
 </head>
 <body>
@@ -126,6 +169,10 @@
             <!-- Lojas futuras aqui -->
           </select>
         </div>
+        <div class="row" style="margin-top:14px;">
+          <button type="button" class="btn btn-secondary" style="font-size:0.8rem; padding:10px; margin:0;" onclick="prepararNovaLoja()">+ Nova Loja</button>
+          <button type="button" class="btn btn-secondary" style="font-size:0.8rem; padding:10px; margin:0;" onclick="carregarListaLojas()">Atualizar Lista</button>
+        </div>
       </div>
 
       <div id="loader" class="loader">Buscando dados no servidor...</div>
@@ -153,7 +200,12 @@
             <div class="input-group"><label>Checkouts</label><input type="number" id="loja_checkouts" required></div>
             <div class="input-group"><label>Área (m²)</label><input type="number" id="loja_area" required></div>
           </div>
-          <div class="input-group"><label>URL da Foto da Fachada</label><input type="text" id="loja_foto"></div>
+          <div class="photo-uploader">
+            <div class="input-group"><label>URL atual da Foto da Fachada</label><input type="text" id="loja_foto" placeholder="Upload preencherá este campo automaticamente"></div>
+            <img class="photo-preview" id="loja_foto_preview" alt="Preview da fachada">
+            <div class="input-group"><label>Enviar nova Foto da Fachada</label><input type="file" id="loja_foto_file" accept="image/*"></div>
+            <div class="photo-status" id="loja_foto_status"></div>
+          </div>
         </div>
 
         <!-- BLOCO 2: PROMOTOR -->
@@ -170,7 +222,37 @@
             <div class="input-group"><label>Data Entrada Cia</label><input type="date" id="prom_data_cia"></div>
             <div class="input-group"><label>Data Entrada Loja</label><input type="date" id="prom_data_loja"></div>
           </div>
-          <div class="input-group"><label>URL da Foto do Promotor</label><input type="text" id="prom_foto"></div>
+          <div class="photo-uploader">
+            <div class="input-group"><label>URL atual da Foto do Promotor</label><input type="text" id="prom_foto" placeholder="Upload preencherá este campo automaticamente"></div>
+            <img class="photo-preview" id="prom_foto_preview" alt="Preview do promotor">
+            <div class="input-group"><label>Enviar nova Foto do Promotor</label><input type="file" id="prom_foto_file" accept="image/*"></div>
+            <div class="photo-status" id="prom_foto_status"></div>
+          </div>
+        </div>
+
+        <!-- BLOCO 2.5: FOTOS DA ROTA -->
+        <div class="card">
+          <h2>📸 Fotos da Rota</h2>
+          <div class="row">
+            <div class="input-group">
+              <label>Etapa da Rota</label>
+              <select id="rota_foto_etapa">
+                <option value="fachada">Entrada & Corredores</option>
+                <option value="gondola">Gôndola</option>
+                <option value="ponto_extra">Ponto Extra</option>
+                <option value="geladeira">Geladeira</option>
+                <option value="outros">Outros</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Título da Foto</label>
+              <input type="text" id="rota_foto_titulo" placeholder="Ex: Gôndola premium">
+            </div>
+          </div>
+          <div class="input-group"><label>Enviar Foto da Etapa</label><input type="file" id="rota_foto_file" accept="image/*"></div>
+          <button type="button" class="btn btn-secondary" style="font-size:0.8rem; padding:10px;" onclick="adicionarFotoRota()">Adicionar Foto à Rota</button>
+          <div class="photo-status" id="rota_foto_status"></div>
+          <div id="rota_fotos_lista"></div>
         </div>
 
         <!-- BLOCO 3: FDS E SOVI -->
@@ -274,6 +356,31 @@
           <div class="input-group"><label>Gerente Regional</label><select id="lid_ger_regional"></select></div>
         </div>
 
+        <div class="card">
+          <h2>➕ Cadastrar Liderança</h2>
+          <div class="row">
+            <div class="input-group">
+              <label>Cargo</label>
+              <select id="novo_lider_cargo">
+                <option value="Supervisor de Trade">Supervisor(a) de Trade</option>
+                <option value="Executivo de Trade">Executivo(a) de Trade</option>
+                <option value="Coordenador de Trade">Coordenador(a) de Trade</option>
+                <option value="Executivo de Vendas">Executivo(a) de Vendas</option>
+                <option value="Gerente de Vendas">Gerente de Vendas</option>
+                <option value="Gerente Regional">Gerente Regional</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Nome</label>
+              <input type="text" id="novo_lider_nome" placeholder="Nome completo">
+            </div>
+          </div>
+          <div class="input-group"><label>Foto</label><input type="file" id="novo_lider_foto" accept="image/*"></div>
+          <img class="photo-preview" id="novo_lider_preview" alt="Preview da nova liderança">
+          <button type="button" class="btn btn-secondary" style="font-size:0.8rem; padding:10px;" onclick="cadastrarNovoLider()">Adicionar Pessoa</button>
+          <div class="photo-status" id="novo_lider_status"></div>
+        </div>
+
         <div id="save-status" class="status-msg"></div>
         <button type="submit" class="btn" style="position:sticky; bottom:20px; box-shadow:0 10px 20px rgba(0,0,0,0.5);">Salvar Tudo</button>
         <button type="button" class="btn btn-secondary" onclick="verNoApp()">Ver no App</button>
@@ -296,12 +403,18 @@
       if (user) {
         loginSection.style.display = 'none';
         adminSection.style.display = 'block';
-        carregarDadosLoja();
+        inicializarAdmin();
       } else {
         loginSection.style.display = 'block';
         adminSection.style.display = 'none';
       }
     });
+
+    async function inicializarAdmin() {
+      await carregarBancoLideres();
+      await carregarListaLojas();
+      await carregarDadosLoja();
+    }
 
     // LOGIN & LOGOUT
     loginForm.addEventListener('submit', async (e) => {
@@ -316,7 +429,7 @@
     function fazerLogout() { auth.signOut(); }
 
     // BANCO DE DADOS DE LÍDERES
-    const BANCO_LIDERES = {
+    let BANCO_LIDERES = {
       "Supervisor de Trade": [
         { nome: "Isis Colicigno", foto: "./Isis.supervisora.jfif" },
         { nome: "Adriana Seixas", foto: "./Adriana.Seixas.Supervisora-trade.jfif" },
@@ -347,19 +460,20 @@
       ]
     };
 
+    const CARGOS_LIDERANCA = {
+      "Supervisor de Trade": "lid_supervisor",
+      "Executivo de Trade": "lid_exec_trade",
+      "Coordenador de Trade": "lid_coord_trade",
+      "Executivo de Vendas": "lid_exec_vendas",
+      "Gerente de Vendas": "lid_ger_vendas",
+      "Gerente Regional": "lid_ger_regional"
+    };
+
     function inicializarDropdownsLideranca() {
-      const mapSelects = {
-        "Supervisor de Trade": "lid_supervisor",
-        "Executivo de Trade": "lid_exec_trade",
-        "Coordenador de Trade": "lid_coord_trade",
-        "Executivo de Vendas": "lid_exec_vendas",
-        "Gerente de Vendas": "lid_ger_vendas",
-        "Gerente Regional": "lid_ger_regional"
-      };
-      for (const [cargo, selectId] of Object.entries(mapSelects)) {
+      for (const [cargo, selectId] of Object.entries(CARGOS_LIDERANCA)) {
         const select = document.getElementById(selectId);
         select.innerHTML = '';
-        BANCO_LIDERES[cargo].forEach(pessoa => {
+        (BANCO_LIDERES[cargo] || []).forEach(pessoa => {
           const opt = document.createElement('option');
           opt.value = pessoa.nome;
           opt.textContent = pessoa.nome;
@@ -368,8 +482,33 @@
       }
     }
 
-    // Inicializa na abertura
-    inicializarDropdownsLideranca();
+    function slugify(value) {
+      return String(value || '')
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/^_+|_+$/g, '') || `item_${Date.now()}`;
+    }
+
+    function pessoaPorCargoENome(cargo, nome) {
+      return (BANCO_LIDERES[cargo] || []).find(p => p.nome === nome) || { nome, foto: '' };
+    }
+
+    async function carregarBancoLideres() {
+      try {
+        const snap = await db.collection('lideres').get();
+        snap.forEach(doc => {
+          const lider = doc.data();
+          if (!lider.cargo || !lider.nome) return;
+          if (!BANCO_LIDERES[lider.cargo]) BANCO_LIDERES[lider.cargo] = [];
+          const exists = BANCO_LIDERES[lider.cargo].some(p => p.nome === lider.nome);
+          if (!exists) BANCO_LIDERES[lider.cargo].push({ nome: lider.nome, foto: lider.foto || lider.foto_perfil || '' });
+        });
+      } catch (error) {
+        console.warn('Não foi possível carregar lideranças extras:', error);
+      }
+      inicializarDropdownsLideranca();
+    }
 
     // RENDERIZAR CONTRATOS DINÂMICOS
     let blocosContratuais = [];
@@ -402,8 +541,452 @@
       renderizarContratos();
     }
 
+    const ETAPAS_FOTO_ROTA = {
+      fachada: 'Entrada & Corredores',
+      gondola: 'Gôndola',
+      ponto_extra: 'Ponto Extra',
+      geladeira: 'Geladeira',
+      outros: 'Outros'
+    };
+    const CLOUDINARY_CLOUD_NAME = 'dxiotwkt1';
+    const CLOUDINARY_UPLOAD_PRESET = 'dxiotwkt1';
+    let fotosRota = [];
+
+    function escapeHtml(value) {
+      return String(value || '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+      }[char]));
+    }
+
+    function setPhotoPreview(imgId, url) {
+      const img = document.getElementById(imgId);
+      if (!img) return;
+      if (url) {
+        img.src = url;
+        img.style.display = 'block';
+      } else {
+        img.removeAttribute('src');
+        img.style.display = 'none';
+      }
+    }
+
+    function cleanFileName(fileName) {
+      const fallback = 'foto.jpg';
+      return (fileName || fallback)
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9._-]/g, '-')
+        .replace(/-+/g, '-')
+        .toLowerCase();
+    }
+
+    async function uploadFotoLoja(file, folder, statusId) {
+      if (!auth || !auth.currentUser) throw new Error('Você precisa estar logado no admin para enviar fotos.');
+      const lojaId = document.getElementById('loja-select').value;
+      return uploadImagemCloudinary(file, `rota-guiada/lojas/${lojaId}/${folder}`, statusId);
+    }
+
+    async function uploadImagemCloudinary(file, cloudFolder, statusId) {
+      if (!auth || !auth.currentUser) throw new Error('Você precisa estar logado no admin para enviar fotos.');
+      const status = document.getElementById(statusId);
+      const safeName = cleanFileName(file.name);
+      const fileSizeMb = file.size ? (file.size / 1024 / 1024).toFixed(1) : '0';
+      status.innerText = `Enviando foto... 0% (${fileSizeMb} MB)`;
+
+      const result = await new Promise((resolve, reject) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        formData.append('folder', cloudFolder);
+        formData.append('public_id', `${Date.now()}-${safeName.replace(/\.[^.]+$/, '')}`);
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`);
+        xhr.timeout = 60000;
+
+        xhr.upload.onprogress = event => {
+          if (!event.lengthComputable) {
+            status.innerText = `Enviando foto... (${fileSizeMb} MB)`;
+            return;
+          }
+          const pct = Math.round((event.loaded / event.total) * 100);
+          status.innerText = `Enviando foto... ${pct}% (${fileSizeMb} MB)`;
+        };
+
+        xhr.onload = () => {
+          let response = null;
+          try {
+            response = JSON.parse(xhr.responseText || '{}');
+          } catch (_) {}
+
+          if (xhr.status >= 200 && xhr.status < 300 && response && response.secure_url) {
+            resolve(response);
+            return;
+          }
+
+          reject(new Error((response && response.error && response.error.message) || `Cloudinary retornou HTTP ${xhr.status}.`));
+        };
+
+        xhr.onerror = () => reject(new Error('Falha de rede ao enviar para o Cloudinary.'));
+        xhr.ontimeout = () => reject(new Error('Upload sem resposta por 60 segundos. Tente uma imagem menor ou uma conexão melhor.'));
+        xhr.send(formData);
+      });
+
+      const url = result.secure_url;
+      status.innerText = 'Foto enviada. Clique em Salvar Tudo para publicar no app.';
+      return {
+        url,
+        storagePath: result.public_id || `${cloudFolder}/${safeName}`
+      };
+    }
+
+    function getUploadErrorMessage(error) {
+      console.error('Erro completo do upload de imagem:', error);
+
+      let serverError = null;
+      if (error && error.serverResponse) {
+        try {
+          serverError = JSON.parse(error.serverResponse).error || null;
+        } catch (_) {
+          serverError = { message: error.serverResponse };
+        }
+      }
+
+      const serverCode = serverError && serverError.code;
+      const serverMessage = serverError && serverError.message;
+      const code = error && error.code;
+
+      if (code === 'storage/unauthenticated') {
+        return 'Você precisa estar logado no admin para enviar fotos.';
+      }
+      if (code === 'storage/unauthorized' || serverCode === 403) {
+        return 'Sem permissão para enviar a imagem.';
+      }
+      if (code === 'storage/quota-exceeded') {
+        return 'Cota do serviço de imagens excedida.';
+      }
+      if (code === 'storage/no-default-bucket' || code === 'storage/bucket-not-found' || serverCode === 404) {
+        return 'Serviço de imagens não encontrado ou configuração inválida.';
+      }
+      if (code === 'storage/retry-limit-exceeded') {
+        return 'Tempo limite no upload. Tente uma imagem menor ou uma conexão melhor.';
+      }
+      if (window.location.protocol === 'file:') {
+        return `${error.message || 'Falha no upload.'} Se o bucket e as regras estiverem corretos, teste pelo Firebase Hosting ou por um servidor local http://localhost em vez de file://.`;
+      }
+      return serverMessage || (error && error.message) || 'Erro desconhecido no upload.';
+    }
+
+    async function handleFotoPrincipalUpload(fileInputId, urlInputId, previewId, folder, statusId) {
+      const input = document.getElementById(fileInputId);
+      const file = input.files && input.files[0];
+      if (!file) return;
+      try {
+        const uploaded = await uploadFotoLoja(file, folder, statusId);
+        document.getElementById(urlInputId).value = uploaded.url;
+        setPhotoPreview(previewId, uploaded.url);
+      } catch (error) {
+        document.getElementById(statusId).innerText = 'Erro ao enviar: ' + getUploadErrorMessage(error);
+      } finally {
+        input.value = '';
+      }
+    }
+
+    function renderFotosRota() {
+      const container = document.getElementById('rota_fotos_lista');
+      if (!fotosRota.length) {
+        container.innerHTML = '<p style="color:var(--silver);font-size:0.82rem;text-align:center;margin-top:14px;">Nenhuma foto da rota cadastrada ainda.</p>';
+        return;
+      }
+      fotosRota.sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
+      container.innerHTML = fotosRota
+        .map((foto, index) => `
+          <div class="route-photo-item">
+            <img src="${escapeHtml(foto.url)}" alt="${escapeHtml(foto.titulo || ETAPAS_FOTO_ROTA[foto.etapa] || 'Foto da rota')}">
+            <div class="route-photo-meta">
+              <strong>${escapeHtml(foto.titulo || 'Foto da rota')}</strong>
+              <span>${escapeHtml(ETAPAS_FOTO_ROTA[foto.etapa] || foto.etapa || 'Outros')}</span>
+              <div class="route-photo-actions">
+                <select class="mini-select" onchange="moverFotoRota(${index}, this.value)">
+                  ${Object.entries(ETAPAS_FOTO_ROTA).map(([value, label]) => `<option value="${value}" ${foto.etapa === value ? 'selected' : ''}>${label}</option>`).join('')}
+                </select>
+                <button type="button" class="mini-btn danger" onclick="removerFotoRota(${index})">Remover</button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+    }
+
+    async function adicionarFotoRota() {
+      const input = document.getElementById('rota_foto_file');
+      const file = input.files && input.files[0];
+      const etapa = document.getElementById('rota_foto_etapa').value;
+      const titulo = document.getElementById('rota_foto_titulo').value.trim() || ETAPAS_FOTO_ROTA[etapa] || 'Foto da rota';
+      const status = document.getElementById('rota_foto_status');
+      if (!file) {
+        status.innerText = 'Escolha uma imagem antes de adicionar.';
+        return;
+      }
+      try {
+        const uploaded = await uploadFotoLoja(file, `rota/${etapa}`, 'rota_foto_status');
+        fotosRota.push({
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          etapa,
+          titulo,
+          url: uploaded.url,
+          storagePath: uploaded.storagePath,
+          ordem: fotosRota.length + 1,
+          createdAt: new Date().toISOString()
+        });
+        document.getElementById('rota_foto_titulo').value = '';
+        input.value = '';
+        renderFotosRota();
+        status.innerText = 'Foto adicionada. Clique em Salvar Tudo para publicar no app.';
+      } catch (error) {
+        status.innerText = 'Erro ao enviar: ' + getUploadErrorMessage(error);
+      }
+    }
+
+    function removerFotoRota(index) {
+      if (!confirm('Remover esta foto da rota? Ela deixará de aparecer no app após salvar.')) return;
+      fotosRota.splice(index, 1);
+      fotosRota = fotosRota.map((foto, i) => ({ ...foto, ordem: i + 1 }));
+      renderFotosRota();
+      document.getElementById('rota_foto_status').innerText = 'Foto removida da lista. Clique em Salvar Tudo para publicar.';
+    }
+
+    function moverFotoRota(index, novaEtapa) {
+      if (!fotosRota[index] || !ETAPAS_FOTO_ROTA[novaEtapa]) return;
+      fotosRota[index].etapa = novaEtapa;
+      fotosRota[index].ordem = fotosRota.filter(foto => foto.etapa === novaEtapa).length;
+      renderFotosRota();
+      document.getElementById('rota_foto_status').innerText = `Foto movida para ${ETAPAS_FOTO_ROTA[novaEtapa]}. Clique em Salvar Tudo para publicar.`;
+    }
+
+    async function cadastrarNovoLider() {
+      const cargo = document.getElementById('novo_lider_cargo').value;
+      const nome = document.getElementById('novo_lider_nome').value.trim();
+      const fileInput = document.getElementById('novo_lider_foto');
+      const file = fileInput.files && fileInput.files[0];
+      const status = document.getElementById('novo_lider_status');
+
+      if (!nome) {
+        status.innerText = 'Informe o nome da pessoa.';
+        return;
+      }
+      if (!file) {
+        status.innerText = 'Escolha uma foto para cadastrar a liderança.';
+        return;
+      }
+
+      try {
+        const uploaded = await uploadImagemCloudinary(file, `rota-guiada/lideranca/${slugify(cargo)}`, 'novo_lider_status');
+        const pessoa = { nome, foto: uploaded.url };
+        if (!BANCO_LIDERES[cargo]) BANCO_LIDERES[cargo] = [];
+        const index = BANCO_LIDERES[cargo].findIndex(p => p.nome === nome);
+        if (index >= 0) BANCO_LIDERES[cargo][index] = pessoa;
+        else BANCO_LIDERES[cargo].push(pessoa);
+
+        await db.collection('lideres').doc(`${slugify(cargo)}_${slugify(nome)}`).set({
+          cargo,
+          nome,
+          foto: uploaded.url,
+          storagePath: uploaded.storagePath,
+          updatedAt: new Date().toISOString()
+        });
+
+        inicializarDropdownsLideranca();
+        const selectId = CARGOS_LIDERANCA[cargo];
+        if (selectId) document.getElementById(selectId).value = nome;
+        document.getElementById('novo_lider_nome').value = '';
+        fileInput.value = '';
+        setPhotoPreview('novo_lider_preview', '');
+        status.innerText = 'Pessoa cadastrada e disponível na liderança da loja.';
+      } catch (error) {
+        status.innerText = 'Erro ao cadastrar liderança: ' + getUploadErrorMessage(error);
+      }
+    }
+
+    function criarDadosLojaPadrao(nome, lojaId) {
+      const liderancaDefault = [
+        { id: 1, cargo: "Supervisor(a) de Trade", nome: (BANCO_LIDERES["Supervisor de Trade"][0] || {}).nome || '', foto_perfil: (BANCO_LIDERES["Supervisor de Trade"][0] || {}).foto || '' },
+        { id: 2, cargo: "Executivo(a) de Trade", nome: (BANCO_LIDERES["Executivo de Trade"][0] || {}).nome || '', foto_perfil: (BANCO_LIDERES["Executivo de Trade"][0] || {}).foto || '' },
+        { id: 3, cargo: "Coordenador(a) de Trade", nome: (BANCO_LIDERES["Coordenador de Trade"][0] || {}).nome || '', foto_perfil: (BANCO_LIDERES["Coordenador de Trade"][0] || {}).foto || '' },
+        { id: 4, cargo: "Executivo(a) de Vendas", nome: (BANCO_LIDERES["Executivo de Vendas"][0] || {}).nome || '', foto_perfil: (BANCO_LIDERES["Executivo de Vendas"][0] || {}).foto || '' },
+        { id: 5, cargo: "Gerente de Vendas", nome: (BANCO_LIDERES["Gerente de Vendas"][0] || {}).nome || '', foto_perfil: (BANCO_LIDERES["Gerente de Vendas"][0] || {}).foto || '' },
+        { id: 6, cargo: "Gerente Regional", nome: (BANCO_LIDERES["Gerente Regional"][0] || {}).nome || '', foto_perfil: (BANCO_LIDERES["Gerente Regional"][0] || {}).foto || '' }
+      ];
+
+      return {
+        loja: {
+          id: lojaId,
+          nome,
+          endereco: '',
+          tipo: 'Supermercado',
+          data_inauguracao: '',
+          data_reinauguracao: '',
+          checkouts: 0,
+          area_vendas_m2: 0,
+          imagem_fachada: '',
+          fotos_rota: []
+        },
+        promotor: {
+          nome: '',
+          idade: 0,
+          data_entrada_cia: '',
+          data_entrada_loja: '',
+          paixao: '',
+          icone_paixao: '',
+          valor_cia: '',
+          foto_perfil: ''
+        },
+        lideranca: liderancaDefault,
+        contrato: { vigente: false, tipo: '', blocos_contratuais: [], cumprindo_acordado: false },
+        fds_2026: {
+          pontuacao_atual: 0,
+          itens_obrigatorios_cadastrados: false,
+          sovi: {
+            share_total: 0,
+            share_categorias: {
+              craft: { atual: 0, meta: 0 },
+              premium: { atual: 0, meta: 0 },
+              mainstream: { atual: 0, meta: 0 }
+            }
+          },
+          pontos_extras: {
+            percentual_cia_vs_concorrencia: 0,
+            total_loja: 0,
+            pe_categorias: {
+              craft: { atual: 0, meta: 0 },
+              premium: { atual: 0, meta: 0 },
+              mainstream: { atual: 0, meta: 0 }
+            },
+            atinge_meta: false,
+            tem_display: false
+          },
+          refrigeradores: {
+            cia_quantidade: 0,
+            concorrencia_quantidade: 0,
+            capacidade_padrao: 'Equipamentos com 4 níveis/prateleiras',
+            tem_refrigerador_cinza_na_loja: false
+          }
+        },
+        kpis: { faturamento_bruto: 0, volume_hl: 0, mix_premium: 0 }
+      };
+    }
+
     // CARREGAR DADOS DA LOJA DO FIRESTORE
     let lojaAtualData = null; // Guarda o documento inteiro para não perder liderança e perfil_vendas
+    async function carregarListaLojas(selectedId) {
+      const select = document.getElementById('loja-select');
+      const current = selectedId || select.value || 'mundial_abelardo';
+      try {
+        const snap = await db.collection('lojas').get();
+        const lojas = [];
+        snap.forEach(doc => {
+          const data = doc.data();
+          lojas.push({ id: doc.id, nome: (data.loja && data.loja.nome) || doc.id });
+        });
+        lojas.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+        select.innerHTML = lojas.map(loja => `<option value="${escapeHtml(loja.id)}">${escapeHtml(loja.nome)}</option>`).join('');
+        if (lojas.some(loja => loja.id === current)) select.value = current;
+      } catch (error) {
+        console.warn('Não foi possível carregar lista dinâmica de lojas:', error);
+      }
+    }
+
+    function prepararNovaLoja() {
+      const nome = prompt('Nome da nova loja:');
+      if (!nome || !nome.trim()) return;
+      const lojaId = slugify(nome);
+      const select = document.getElementById('loja-select');
+      if (![...select.options].some(opt => opt.value === lojaId)) {
+        const opt = document.createElement('option');
+        opt.value = lojaId;
+        opt.textContent = `${nome.trim()} (nova)`;
+        select.appendChild(opt);
+      }
+      select.value = lojaId;
+      lojaAtualData = criarDadosLojaPadrao(nome.trim(), lojaId);
+      preencherFormularioLoja(lojaAtualData);
+      document.getElementById('save-status').style.color = 'var(--green-light)';
+      document.getElementById('save-status').innerText = 'Nova loja preparada. Preencha os dados e clique em Salvar Tudo para cadastrar.';
+    }
+
+    function preencherFormularioLoja(data) {
+      if (!data.loja) data.loja = {};
+      if (!data.promotor) data.promotor = {};
+      if (!data.fds_2026) data.fds_2026 = criarDadosLojaPadrao(data.loja.nome || 'Loja', data.loja.id || 'loja').fds_2026;
+      if (!data.fds_2026.sovi) data.fds_2026.sovi = criarDadosLojaPadrao('', '').fds_2026.sovi;
+      if (!data.fds_2026.pontos_extras) data.fds_2026.pontos_extras = criarDadosLojaPadrao('', '').fds_2026.pontos_extras;
+      if (!data.fds_2026.refrigeradores) data.fds_2026.refrigeradores = criarDadosLojaPadrao('', '').fds_2026.refrigeradores;
+      if (!data.kpis) data.kpis = {};
+
+      document.getElementById('loja_nome').value = data.loja.nome || '';
+      document.getElementById('loja_endereco').value = data.loja.endereco || '';
+      document.getElementById('loja_tipo').value = data.loja.tipo || '';
+      document.getElementById('loja_inauguracao').value = data.loja.data_inauguracao || '';
+      document.getElementById('loja_reinauguracao').value = data.loja.data_reinauguracao || '';
+      document.getElementById('loja_checkouts').value = data.loja.checkouts || 0;
+      document.getElementById('loja_area').value = data.loja.area_vendas_m2 || 0;
+      document.getElementById('loja_foto').value = data.loja.imagem_fachada || '';
+      setPhotoPreview('loja_foto_preview', data.loja.imagem_fachada || '');
+
+      document.getElementById('prom_nome').value = data.promotor.nome || '';
+      document.getElementById('prom_idade').value = data.promotor.idade || '';
+      document.getElementById('prom_paixao').value = data.promotor.paixao || '';
+      document.getElementById('prom_icone_paixao').value = data.promotor.icone_paixao || '';
+      document.getElementById('prom_valor').value = data.promotor.valor_cia || '';
+      document.getElementById('prom_data_cia').value = data.promotor.data_entrada_cia || '';
+      document.getElementById('prom_data_loja').value = data.promotor.data_entrada_loja || '';
+      document.getElementById('prom_foto').value = data.promotor.foto_perfil || '';
+      setPhotoPreview('prom_foto_preview', data.promotor.foto_perfil || '');
+
+      fotosRota = Array.isArray(data.loja.fotos_rota) ? JSON.parse(JSON.stringify(data.loja.fotos_rota)) : [];
+      renderFotosRota();
+      document.getElementById('rota_foto_status').innerText = '';
+
+      document.getElementById('fds_pontuacao').value = data.fds_2026.pontuacao_atual || 0;
+      document.getElementById('fds_itens_obrig').checked = !!data.fds_2026.itens_obrigatorios_cadastrados;
+      document.getElementById('sovi_share_total').value = data.fds_2026.sovi.share_total || 0;
+      document.getElementById('sovi_craft_atual').value = data.fds_2026.sovi.share_categorias.craft.atual || 0;
+      document.getElementById('sovi_craft_meta').value = data.fds_2026.sovi.share_categorias.craft.meta || 0;
+      document.getElementById('sovi_prem_atual').value = data.fds_2026.sovi.share_categorias.premium.atual || 0;
+      document.getElementById('sovi_prem_meta').value = data.fds_2026.sovi.share_categorias.premium.meta || 0;
+      document.getElementById('sovi_main_atual').value = data.fds_2026.sovi.share_categorias.mainstream.atual || 0;
+      document.getElementById('sovi_main_meta').value = data.fds_2026.sovi.share_categorias.mainstream.meta || 0;
+
+      document.getElementById('pe_total').value = data.fds_2026.pontos_extras.total_loja || 0;
+      document.getElementById('pe_perc_cia').value = data.fds_2026.pontos_extras.percentual_cia_vs_concorrencia || 0;
+      document.getElementById('pe_display').checked = !!data.fds_2026.pontos_extras.tem_display;
+      document.getElementById('pe_craft_atual').value = data.fds_2026.pontos_extras.pe_categorias.craft.atual || 0;
+      document.getElementById('pe_craft_meta').value = data.fds_2026.pontos_extras.pe_categorias.craft.meta || 0;
+      document.getElementById('pe_prem_atual').value = data.fds_2026.pontos_extras.pe_categorias.premium.atual || 0;
+      document.getElementById('pe_prem_meta').value = data.fds_2026.pontos_extras.pe_categorias.premium.meta || 0;
+      document.getElementById('pe_main_atual').value = data.fds_2026.pontos_extras.pe_categorias.mainstream.atual || 0;
+      document.getElementById('pe_main_meta').value = data.fds_2026.pontos_extras.pe_categorias.mainstream.meta || 0;
+
+      document.getElementById('gel_cia').value = data.fds_2026.refrigeradores.cia_quantidade || 0;
+      document.getElementById('gel_conc').value = data.fds_2026.refrigeradores.concorrencia_quantidade || 0;
+      document.getElementById('gel_cinza').checked = !!data.fds_2026.refrigeradores.tem_refrigerador_cinza_na_loja;
+
+      document.getElementById('kpi_fat').value = data.kpis.faturamento_bruto || 0;
+      document.getElementById('kpi_vol').value = data.kpis.volume_hl || 0;
+      document.getElementById('kpi_mix').value = data.kpis.mix_premium || 0;
+
+      const lideranca = data.lideranca || [];
+      document.getElementById('lid_supervisor').value = lideranca[0] ? lideranca[0].nome : ((BANCO_LIDERES["Supervisor de Trade"][0] || {}).nome || '');
+      document.getElementById('lid_exec_trade').value = lideranca[1] ? lideranca[1].nome : ((BANCO_LIDERES["Executivo de Trade"][0] || {}).nome || '');
+      document.getElementById('lid_coord_trade').value = lideranca[2] ? lideranca[2].nome : ((BANCO_LIDERES["Coordenador de Trade"][0] || {}).nome || '');
+      document.getElementById('lid_exec_vendas').value = lideranca[3] ? lideranca[3].nome : ((BANCO_LIDERES["Executivo de Vendas"][0] || {}).nome || '');
+      document.getElementById('lid_ger_vendas').value = lideranca[4] ? lideranca[4].nome : ((BANCO_LIDERES["Gerente de Vendas"][0] || {}).nome || '');
+      document.getElementById('lid_ger_regional').value = lideranca[5] ? lideranca[5].nome : ((BANCO_LIDERES["Gerente Regional"][0] || {}).nome || '');
+
+      document.getElementById('contrato_vigente').checked = !!(data.contrato && data.contrato.vigente);
+      blocosContratuais = (data.contrato && data.contrato.blocos_contratuais) ? JSON.parse(JSON.stringify(data.contrato.blocos_contratuais)) : [];
+      renderizarContratos();
+      loader.style.display = 'none';
+      editForm.style.display = 'block';
+    }
+
     async function carregarDadosLoja() {
       const lojaId = document.getElementById('loja-select').value;
       editForm.style.display = 'none';
@@ -425,6 +1008,7 @@
           document.getElementById('loja_checkouts').value = data.loja.checkouts || 0;
           document.getElementById('loja_area').value = data.loja.area_vendas_m2 || 0;
           document.getElementById('loja_foto').value = data.loja.imagem_fachada || '';
+          setPhotoPreview('loja_foto_preview', data.loja.imagem_fachada || '');
 
           // Promotor
           document.getElementById('prom_nome').value = data.promotor.nome || '';
@@ -435,6 +1019,11 @@
           document.getElementById('prom_data_cia').value = data.promotor.data_entrada_cia || '';
           document.getElementById('prom_data_loja').value = data.promotor.data_entrada_loja || '';
           document.getElementById('prom_foto').value = data.promotor.foto_perfil || '';
+          setPhotoPreview('prom_foto_preview', data.promotor.foto_perfil || '');
+
+          fotosRota = Array.isArray(data.loja.fotos_rota) ? JSON.parse(JSON.stringify(data.loja.fotos_rota)) : [];
+          renderFotosRota();
+          document.getElementById('rota_foto_status').innerText = '';
 
           // FDS
           document.getElementById('fds_pontuacao').value = data.fds_2026.pontuacao_atual || 0;
@@ -506,6 +1095,17 @@
     const v = (id) => document.getElementById(id).value;
     const c = (id) => document.getElementById(id).checked;
 
+    document.getElementById('loja_foto_file').addEventListener('change', () => {
+      handleFotoPrincipalUpload('loja_foto_file', 'loja_foto', 'loja_foto_preview', 'fachada', 'loja_foto_status');
+    });
+    document.getElementById('prom_foto_file').addEventListener('change', () => {
+      handleFotoPrincipalUpload('prom_foto_file', 'prom_foto', 'prom_foto_preview', 'promotor', 'prom_foto_status');
+    });
+    document.getElementById('novo_lider_foto').addEventListener('change', (event) => {
+      const file = event.target.files && event.target.files[0];
+      setPhotoPreview('novo_lider_preview', file ? URL.createObjectURL(file) : '');
+    });
+
     // SALVAR ALTERAÇÕES
     editForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -523,7 +1123,7 @@
             ...lojaAtualData.loja,
             nome: v('loja_nome'), endereco: v('loja_endereco'), tipo: v('loja_tipo'),
             data_inauguracao: v('loja_inauguracao'), data_reinauguracao: v('loja_reinauguracao'), checkouts: n('loja_checkouts'),
-            area_vendas_m2: n('loja_area'), imagem_fachada: v('loja_foto')
+            area_vendas_m2: n('loja_area'), imagem_fachada: v('loja_foto'), fotos_rota: fotosRota
           },
           promotor: {
             ...lojaAtualData.promotor,
@@ -563,12 +1163,12 @@
             faturamento_bruto: n('kpi_fat'), volume_hl: n('kpi_vol'), mix_premium: n('kpi_mix')
           },
           lideranca: [
-            { id: 1, cargo: "Supervisor(a) de Trade", nome: v('lid_supervisor'), foto_perfil: BANCO_LIDERES["Supervisor de Trade"].find(p=>p.nome===v('lid_supervisor')).foto },
-            { id: 2, cargo: "Executivo(a) de Trade", nome: v('lid_exec_trade'), foto_perfil: BANCO_LIDERES["Executivo de Trade"].find(p=>p.nome===v('lid_exec_trade')).foto },
-            { id: 3, cargo: "Coordenador(a) de Trade", nome: v('lid_coord_trade'), foto_perfil: BANCO_LIDERES["Coordenador de Trade"].find(p=>p.nome===v('lid_coord_trade')).foto },
-            { id: 4, cargo: "Executivo(a) de Vendas", nome: v('lid_exec_vendas'), foto_perfil: BANCO_LIDERES["Executivo de Vendas"].find(p=>p.nome===v('lid_exec_vendas')).foto },
-            { id: 5, cargo: "Gerente de Vendas", nome: v('lid_ger_vendas'), foto_perfil: BANCO_LIDERES["Gerente de Vendas"].find(p=>p.nome===v('lid_ger_vendas')).foto },
-            { id: 6, cargo: "Gerente Regional", nome: v('lid_ger_regional'), foto_perfil: BANCO_LIDERES["Gerente Regional"].find(p=>p.nome===v('lid_ger_regional')).foto }
+            { id: 1, cargo: "Supervisor(a) de Trade", nome: v('lid_supervisor'), foto_perfil: pessoaPorCargoENome("Supervisor de Trade", v('lid_supervisor')).foto },
+            { id: 2, cargo: "Executivo(a) de Trade", nome: v('lid_exec_trade'), foto_perfil: pessoaPorCargoENome("Executivo de Trade", v('lid_exec_trade')).foto },
+            { id: 3, cargo: "Coordenador(a) de Trade", nome: v('lid_coord_trade'), foto_perfil: pessoaPorCargoENome("Coordenador de Trade", v('lid_coord_trade')).foto },
+            { id: 4, cargo: "Executivo(a) de Vendas", nome: v('lid_exec_vendas'), foto_perfil: pessoaPorCargoENome("Executivo de Vendas", v('lid_exec_vendas')).foto },
+            { id: 5, cargo: "Gerente de Vendas", nome: v('lid_ger_vendas'), foto_perfil: pessoaPorCargoENome("Gerente de Vendas", v('lid_ger_vendas')).foto },
+            { id: 6, cargo: "Gerente Regional", nome: v('lid_ger_regional'), foto_perfil: pessoaPorCargoENome("Gerente Regional", v('lid_ger_regional')).foto }
           ],
           contrato: {
             ...lojaAtualData.contrato,
@@ -578,6 +1178,7 @@
         };
 
         await db.collection("lojas").doc(lojaId).set(newData);
+        await carregarListaLojas(lojaId);
         
         statusDiv.style.color = "var(--green-light)";
         statusDiv.innerText = "✅ Tudo salvo com sucesso!";
@@ -590,7 +1191,7 @@
 
     function verNoApp() {
       const lojaId = document.getElementById('loja-select').value;
-      window.open('index.html?loja=' + lojaId, '_blank');
+      window.location.href = `index.html?loja=${encodeURIComponent(lojaId)}`;
     }
 
     // FEEDBACKS

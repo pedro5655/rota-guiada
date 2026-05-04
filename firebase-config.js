@@ -14,4 +14,4 @@ firebase.initializeApp(firebaseConfig);
 
 // Referências globais para o Banco de Dados e Autenticação
 const db = firebase.firestore();
-const auth = firebase.auth();
+const auth = firebase.auth ? firebase.auth() : null;
