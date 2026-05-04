@@ -17,6 +17,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script src="firebase-config.js"></script>
 
   <style>
@@ -96,6 +97,9 @@
     .mini-btn { border: 1px solid var(--card-border); background: rgba(255,255,255,0.04); color: var(--silver); border-radius: 8px; padding: 7px 9px; font-size: 0.72rem; cursor: pointer; }
     .mini-btn.danger { color: #ff6b6b; border-color: rgba(235,87,87,0.5); }
     .mini-select { width: auto; min-width: 132px; padding: 7px 8px; font-size: 0.72rem; border-radius: 8px; }
+    .qr-box { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+    #qr-code { background: #fff; padding: 10px; border-radius: 10px; width: fit-content; }
+    #qr-link { word-break: break-all; color: var(--silver); font-size: 0.8rem; line-height: 1.4; margin-top: 8px; }
 
     @media (max-width: 480px) {
       body { padding: 12px; align-items: flex-start; }
@@ -123,6 +127,8 @@
       .route-photo-actions { flex-wrap: wrap; }
       .mini-btn { min-height: 36px; }
       .mini-select { width: 100%; min-height: 36px; }
+      .qr-box { flex-direction: column; align-items: stretch; }
+      #qr-code { margin: 0 auto; }
       #edit-form > .btn { min-height: 48px; }
       #edit-form > .btn[style*="sticky"] { bottom: 12px !important; border-radius: 12px; }
     }
@@ -173,6 +179,22 @@
           <button type="button" class="btn btn-secondary" style="font-size:0.8rem; padding:10px; margin:0;" onclick="prepararNovaLoja()">+ Nova Loja</button>
           <button type="button" class="btn btn-secondary" style="font-size:0.8rem; padding:10px; margin:0;" onclick="carregarListaLojas()">Atualizar Lista</button>
         </div>
+      </div>
+
+      <div class="card" id="qr-card">
+        <h2>📱 QR Code da Loja</h2>
+        <div class="qr-box">
+          <div id="qr-code"></div>
+          <div style="flex:1; min-width:220px;">
+            <label style="color:var(--green-light); font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;">Link público</label>
+            <div id="qr-link"></div>
+            <div class="row" style="margin-top:12px;">
+              <button type="button" class="btn btn-secondary" style="font-size:0.78rem; padding:10px; margin:0;" onclick="copiarLinkQr()">Copiar Link</button>
+              <button type="button" class="btn btn-secondary" style="font-size:0.78rem; padding:10px; margin:0;" onclick="baixarQrCode()">Baixar QR</button>
+            </div>
+          </div>
+        </div>
+        <div class="photo-status" id="qr-status"></div>
       </div>
 
       <div id="loader" class="loader">Buscando dados no servidor...</div>
@@ -488,6 +510,68 @@
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '_')
         .replace(/^_+|_+$/g, '') || `item_${Date.now()}`;
+    }
+
+    function getPublicBaseUrl() {
+      const host = window.location.hostname;
+      if (host === 'localhost' || host === '127.0.0.1' || window.location.protocol === 'file:') {
+        return 'https://pedro5655.github.io/rota-guiada';
+      }
+      return `${window.location.origin}${window.location.pathname.replace(/\/admin\.html$/, '')}`;
+    }
+
+    function getLojaPublicUrl() {
+      const lojaId = document.getElementById('loja-select').value;
+      return `${getPublicBaseUrl()}/index.html?loja=${encodeURIComponent(lojaId)}`;
+    }
+
+    function atualizarQrCode() {
+      const qrEl = document.getElementById('qr-code');
+      const linkEl = document.getElementById('qr-link');
+      const statusEl = document.getElementById('qr-status');
+      if (!qrEl || !linkEl) return;
+      const url = getLojaPublicUrl();
+      linkEl.textContent = url;
+      qrEl.innerHTML = '';
+      if (typeof QRCode === 'undefined') {
+        statusEl.innerText = 'Biblioteca de QR Code não carregou. Verifique a conexão.';
+        return;
+      }
+      new QRCode(qrEl, {
+        text: url,
+        width: 160,
+        height: 160,
+        colorDark: '#0f120f',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+      });
+      statusEl.innerText = '';
+    }
+
+    async function copiarLinkQr() {
+      const url = getLojaPublicUrl();
+      try {
+        await navigator.clipboard.writeText(url);
+        document.getElementById('qr-status').innerText = 'Link copiado.';
+      } catch (_) {
+        document.getElementById('qr-status').innerText = 'Não consegui copiar automaticamente. Selecione e copie o link acima.';
+      }
+    }
+
+    function baixarQrCode() {
+      const qrEl = document.getElementById('qr-code');
+      const canvas = qrEl.querySelector('canvas');
+      const img = qrEl.querySelector('img');
+      const lojaId = document.getElementById('loja-select').value;
+      const link = document.createElement('a');
+      link.download = `qr-rota-guiada-${lojaId}.png`;
+      link.href = canvas ? canvas.toDataURL('image/png') : (img ? img.src : '');
+      if (!link.href) {
+        document.getElementById('qr-status').innerText = 'QR Code ainda não está pronto para baixar.';
+        return;
+      }
+      link.click();
+      document.getElementById('qr-status').innerText = 'QR Code baixado.';
     }
 
     function pessoaPorCargoENome(cargo, nome) {
@@ -888,6 +972,7 @@
         lojas.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
         select.innerHTML = lojas.map(loja => `<option value="${escapeHtml(loja.id)}">${escapeHtml(loja.nome)}</option>`).join('');
         if (lojas.some(loja => loja.id === current)) select.value = current;
+        atualizarQrCode();
       } catch (error) {
         console.warn('Não foi possível carregar lista dinâmica de lojas:', error);
       }
@@ -905,6 +990,7 @@
         select.appendChild(opt);
       }
       select.value = lojaId;
+      atualizarQrCode();
       lojaAtualData = criarDadosLojaPadrao(nome.trim(), lojaId);
       preencherFormularioLoja(lojaAtualData);
       document.getElementById('save-status').style.color = 'var(--green-light)';
@@ -989,6 +1075,7 @@
 
     async function carregarDadosLoja() {
       const lojaId = document.getElementById('loja-select').value;
+      atualizarQrCode();
       editForm.style.display = 'none';
       loader.style.display = 'block';
       document.getElementById('save-status').innerText = "";
